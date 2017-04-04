@@ -8,6 +8,5 @@ node_modules
 npm-debug.log
 
 # Ignored files
-*.ts
-!*.d.ts
-*.map
+#*.ts
+#!*.d.ts
