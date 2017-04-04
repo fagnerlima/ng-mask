@@ -1,6 +1,6 @@
 {
   "name": "@fagnerlima/ng-mask",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "jQuery Mask Plugin Adapter for Angular",
   "main": "index.js",
   "scripts": {
