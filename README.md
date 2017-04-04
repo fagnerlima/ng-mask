@@ -35,7 +35,7 @@ import { NgModule }       from '@angular/core';
 import { FormsModule }    from '@angular/forms';
 
 import { AppComponent } from './app.component';
-import { NgMaskModule } from './mask/ng-mask.module';
+import { NgMaskModule } from '@fagnerlima/ng-mask';
 
 @NgModule({
   imports: [
@@ -54,7 +54,7 @@ export class AppModule { }
 ```typescript
 import { Component } from '@angular/core';
 
-import { MaskOptions } from './mask/mask-options';
+import { MaskOptions } from '@fagnerlima/ng-mask';
 
 @Component({
   selector: 'app-root',

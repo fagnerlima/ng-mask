@@ -10,3 +10,4 @@ npm-debug.log
 # Ignored files
 *.ts
 !*.d.ts
+*.map
