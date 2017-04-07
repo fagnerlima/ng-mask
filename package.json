@@ -1,10 +1,10 @@
 {
   "name": "@fagnerlima/ng-mask",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "jQuery Mask Plugin Adapter for Angular",
-  "main": "index.js",
+  "main": "dist/bundles/ng-mask.umd.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "ngc"
   },
   "repository": {
     "type": "git",
@@ -24,13 +24,18 @@
   "dependencies": {
     "@angular/core": "^2.4.0",
     "@angular/forms": "^2.4.0",
-    "@angular/platform-browser": "^2.4.0",
     "jquery": "^3.2.1",
     "jquery-mask-plugin": "^1.14.10",
     "rxjs": "^5.1.0",
     "zone.js": "^0.7.6"
   },
   "devDependencies": {
-    "typescript": "^2.0.0"
+    "@angular/compiler": "^2.4.0",
+    "@angular/compiler-cli": "^2.4.0",
+    "@angular/platform-browser": "^2.4.0",
+    "@angular/platform-server": "^2.4.0",
+    "rollup": "^0.41.6",
+    "typescript": "^2.0.2",
+    "uglify-js": "^2.8.21"
   }
 }

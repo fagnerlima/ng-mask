@@ -8,6 +8,10 @@ node_modules
 npm-debug.log
 
 # Ignored files
-/src/*.d.ts
-/src/*.js
-/src/*.map
+*.d.ts
+*.js
+*.map
+*.metadata.json
+*.ngfactory.ts
+*.ngsummary.json
+!rollup.config.js
