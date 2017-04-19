@@ -1,6 +1,6 @@
 #NgMask
 
-[![](https://img.shields.io/badge/npm-v1.0.5-brightgreen.svg)](https://www.npmjs.com/package/@fagnerlima/ng-mask)
+[![](https://img.shields.io/badge/npm-v1.0.6-brightgreen.svg)](https://www.npmjs.com/package/@fagnerlima/ng-mask)
 
 NgMask is a jQuery Mask Plugin Adapter for Angular
 (that uses [jquery-mask-plugin](https://github.com/igorescobar/jQuery-Mask-Plugin)).
@@ -61,14 +61,14 @@ import { MaskOptions } from '@fagnerlima/ng-mask';
   template: `
     <h1>NgMask</h1>
 
-    <input type="text" [(ngModel)]="money" [mask]="masks.money.pattern" [maskOptions]="masks.money.options" />
+    <input type="text" [(ngModel)]="money" [mask]="masks.money.mask" [maskOptions]="masks.money.options" />
   `
 })
 export class AppComponent {
-  private readonly masks: { [clazz: string]: { pattern: string, options?: MaskOptions } } = {
-    'date': { pattern: '00/00/0000', options: { placeholder: 'Date' } },
-    'money': { pattern: '#.##0,00', options: { reverse: true } },
-    'ip_address': { pattern: '099.099.099.099' }
+  private readonly masks: { [type: string]: { mask: string, options?: MaskOptions } } = {
+    'date': { mask: '00/00/0000', options: { placeholder: 'Date' } },
+    'money': { mask: '#.##0,00', options: { reverse: true } },
+    'ipAddress': { mask: '099.099.099.099' }
   };
 
   private money: number;

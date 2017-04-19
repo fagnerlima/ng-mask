@@ -10,7 +10,6 @@ declare let $: any;
 
 /**
  * MaskDirective.
- *
  * @author Fagner Lima
  * @since 1.0.0
  */
