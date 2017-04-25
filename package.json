@@ -1,6 +1,6 @@
 {
   "name": "@fagnerlima/ng-mask",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "jQuery Mask Plugin Adapter for Angular",
   "scripts": {
     "build": "./build.sh",
@@ -34,7 +34,7 @@
     "@angular/platform-browser": "^4.0.0",
     "@angular/platform-browser-dynamic": "^4.0.0",
     "@types/jasmine": "2.5.38",
-    "@types/node": "~6.0.60",
+    "@types/node": "^6.0.70",
     "codelyzer": "~2.0.0",
     "core-js": "^2.4.1",
     "jasmine-core": "~2.5.2",

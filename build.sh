@@ -17,6 +17,7 @@ rsync -a --exclude=*.js build/ dist
 
 # Copy package.json to dist
 cp src/package.json dist/package.json
+cp README.md dist/README.md
 
 # Clean up build directory
 rm -rf build
