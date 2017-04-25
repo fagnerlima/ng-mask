@@ -2,11 +2,9 @@ import { Directive, Input, ElementRef, AfterContentInit } from '@angular/core';
 import { NgControl }                                      from '@angular/forms';
 
 import { MaskOptions } from './mask-options';
+import $ from 'jquery';
 
-/**
- * jQuery
- */
-declare let $: any;
+require('jquery-mask-plugin');
 
 /**
  * MaskDirective.

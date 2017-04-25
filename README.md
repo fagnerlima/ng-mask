@@ -1,6 +1,6 @@
 #NgMask
 
-[![](https://img.shields.io/badge/npm-v1.0.8-brightgreen.svg)](https://www.npmjs.com/package/@fagnerlima/ng-mask)
+[![](https://img.shields.io/badge/npm-v1.1.0-brightgreen.svg)](https://www.npmjs.com/package/@fagnerlima/ng-mask)
 
 NgMask is a jQuery Mask Plugin Adapter for Angular
 (that uses [jquery-mask-plugin](https://github.com/igorescobar/jQuery-Mask-Plugin)).
@@ -18,16 +18,7 @@ NgMask is a jQuery Mask Plugin Adapter for Angular
 npm install @fagnerlima/ng-mask
 ```
 
-2. Include js files in angular-cli.json:
-
-```
-"scripts": [
-  "../node_modules/jquery/dist/jquery.min.js",
-  "../node_modules/jquery-mask-plugin/dist/jquery.mask.min.js"
-]
-```
-
-3. Add NgMaskModule into AppModule class:
+2. Add NgMaskModule into AppModule class:
 
 ```typescript
 import { BrowserModule }  from '@angular/platform-browser';
@@ -49,7 +40,7 @@ import { NgMaskModule } from '@fagnerlima/ng-mask';
 export class AppModule { }
 ```
 
-4. Insert the directives in form's components with ngControl (ex. ngModel or formControlName):
+3. Insert the directives in form's components with ngControl (ex. ngModel or formControlName):
 
 ```typescript
 import { Component } from '@angular/core';
