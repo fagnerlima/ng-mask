@@ -1,6 +1,6 @@
 #NgMask
 
-[![](https://img.shields.io/badge/npm-v1.0.7-brightgreen.svg)](https://www.npmjs.com/package/@fagnerlima/ng-mask)
+[![](https://img.shields.io/badge/npm-v1.0.8-brightgreen.svg)](https://www.npmjs.com/package/@fagnerlima/ng-mask)
 
 NgMask is a jQuery Mask Plugin Adapter for Angular
 (that uses [jquery-mask-plugin](https://github.com/igorescobar/jQuery-Mask-Plugin)).
