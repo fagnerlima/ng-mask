@@ -1,16 +1,16 @@
-#NgMask
+# NgMask
 
-[![](https://img.shields.io/badge/npm-v1.1.0-brightgreen.svg)](https://www.npmjs.com/package/@fagnerlima/ng-mask)
+[![](https://img.shields.io/badge/npm-v1.1.1-brightgreen.svg)](https://www.npmjs.com/package/@fagnerlima/ng-mask)
 
 NgMask is a jQuery Mask Plugin Adapter for Angular
 (that uses [jquery-mask-plugin](https://github.com/igorescobar/jQuery-Mask-Plugin)).
 
-##Requirements
+## Requirements
 
 * [jQuery](https://www.npmjs.com/package/jquery)
 * [jquery-mask-plugin](https://www.npmjs.com/package/jquery-mask-plugin)
 
-##Usage
+## Usage
 
 1. Install ng-mask using npm:
 
