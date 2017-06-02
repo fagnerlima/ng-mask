@@ -1,32 +1,27 @@
-/**
- * Interface used for the maskOptions transferred to the MaskDirective.
- * @author Fagner Lima
- * @since 1.0.0
- */
 export interface MaskOptions {
   /**
    *
    * @type boolean [optional]
    */
-  clearIfNotMatch?: boolean,
+  clearIfNotMatch?: boolean;
 
   /**
    *
    * @type string [optional]
    */
-  placeholder?: string,
+  placeholder?: string;
 
   /**
    *
    * @type boolean [optional]
    */
-  reverse?: boolean,
+  reverse?: boolean;
 
   /**
    *
    * @type boolean [optional]
    */
-  selectOnFocus?: boolean,
+  selectOnFocus?: boolean;
 
   /**
    *
@@ -42,19 +37,34 @@ export interface MaskOptions {
        *
        * @type string
        */
-      pattern: RegExp,
+      pattern: RegExp;
 
       /**
        *
        * @type boolean [optional]
        */
-      optional?: boolean,
+      optional?: boolean;
 
       /**
        *
        * @type boolean [optional]
        */
-      recursive?: boolean
+      recursive?: boolean;
     }
-  }
+  };
+}
+
+export interface Mask {
+
+  /**
+   *
+   * @type RegExp|string
+   */
+  pattern: RegExp | string;
+
+  /**
+   *
+   * @type MaskOptions [optional]
+   */
+  options?: MaskOptions;
 }

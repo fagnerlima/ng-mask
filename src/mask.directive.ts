@@ -1,33 +1,25 @@
-import { Directive, Input, ElementRef, AfterContentInit } from '@angular/core';
-import { NgControl }                                      from '@angular/forms';
+import { Directive, Input, ElementRef, AfterContentInit, HostListener } from '@angular/core';
+import { NgControl } from '@angular/forms';
 
-import { MaskOptions } from './mask-options';
 import $ from 'jquery';
+import { Mask } from '.';
 
 require('jquery-mask-plugin');
 
-/**
- * MaskDirective.
- * @author Fagner Lima
- * @since 1.0.0
- */
 @Directive({
-  selector: '[mask]',
-  host: {
-    '(blur)': 'onBlur()'
-  }
+  selector: '[mask]'
 })
 export class MaskDirective implements AfterContentInit {
-  @Input('mask') pattern: string;
-  @Input('maskOptions') options: MaskOptions = {};
 
-  constructor(private elementRef: ElementRef, private ngControl: NgControl) {}
+  @Input() mask: Mask;
+
+  constructor(private elementRef: ElementRef, private ngControl: NgControl) { }
 
   ngAfterContentInit() {
-    $(this.elementRef.nativeElement).mask(this.pattern, this.options);
+    $(this.elementRef.nativeElement).mask(this.mask.pattern, this.mask.options);
   }
 
-  onBlur() {
+  @HostListener('blur') onBlur() {
     this.ngControl.control.setValue(this.elementRef.nativeElement.value);
   }
 }

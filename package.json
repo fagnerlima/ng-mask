@@ -1,7 +1,7 @@
 {
   "name": "@fagnerlima/ng-mask",
-  "version": "1.1.1",
-  "description": "jQuery Mask Plugin Adapter for Angular",
+  "version": "2.0.0",
+  "description": "jQueryMaskPlugin Adapter for Angular",
   "scripts": {
     "build": "./build.sh",
     "build:watch": "node ./watch.js",
@@ -52,7 +52,7 @@
     "ts-node": "~2.0.0",
     "tslint": "~4.5.0",
     "typescript": "~2.2.0",
-    "zone.js": "^0.8.4"
+    "zone.js": "^0.8.9"
   },
   "engines": {
     "node": ">=6.0.0"

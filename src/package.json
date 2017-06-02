@@ -1,7 +1,7 @@
 {
   "name": "@fagnerlima/ng-mask",
-  "version": "1.1.1",
-  "description": "jQuery Mask Plugin Adapter for Angular",
+  "version": "2.0.0",
+  "description": "jQueryMaskPlugin Adapter for Angular",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/fagnerlima91/ng-mask.git"
@@ -30,6 +30,6 @@
     "jquery": "^3.2.1",
     "jquery-mask-plugin": "^1.14.10",
     "rxjs": "^5.1.0",
-    "zone.js": "^0.8.4"
+    "zone.js": "^0.8.9"
   }
 }

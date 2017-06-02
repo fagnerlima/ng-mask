@@ -1,3 +1,3 @@
-export { NgMaskModule }  from './ng-mask.module';
-export { MaskDirective } from './mask.directive';
-export { MaskOptions }   from './mask-options';
+export * from './mask';
+export * from './mask.directive';
+export * from './ng-mask.module';

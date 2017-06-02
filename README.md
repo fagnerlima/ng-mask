@@ -1,9 +1,8 @@
 # NgMask
 
-[![](https://img.shields.io/badge/npm-v1.1.1-brightgreen.svg)](https://www.npmjs.com/package/@fagnerlima/ng-mask)
+[![](https://img.shields.io/badge/npm-v2.0.0-brightgreen.svg)](https://www.npmjs.com/package/@fagnerlima/ng-mask)
 
-NgMask is a jQuery Mask Plugin Adapter for Angular
-(that uses [jquery-mask-plugin](https://github.com/igorescobar/jQuery-Mask-Plugin)).
+NgMask is a [jQueryMaskPlugin](https://github.com/igorescobar/jQuery-Mask-Plugin) Adapter for Angular.
 
 ## Requirements
 
@@ -18,7 +17,7 @@ NgMask is a jQuery Mask Plugin Adapter for Angular
 npm install @fagnerlima/ng-mask
 ```
 
-2. Add NgMaskModule into AppModule class:
+2. Import NgMaskModule into Module class:
 
 ```typescript
 import { BrowserModule }  from '@angular/platform-browser';
@@ -30,12 +29,10 @@ import { NgMaskModule } from '@fagnerlima/ng-mask';
 
 @NgModule({
   imports: [
-    BrowserModule,
-    FormsModule,
+    // ...
     NgMaskModule
   ],
-  declarations: [ AppComponent ],
-  bootstrap: [ AppComponent ]
+  // ...
 })
 export class AppModule { }
 ```
@@ -45,28 +42,23 @@ export class AppModule { }
 ```typescript
 import { Component } from '@angular/core';
 
-import { MaskOptions } from '@fagnerlima/ng-mask';
+import { Mask } from '@fagnerlima/ng-mask';
 
 @Component({
   selector: 'app-root',
   template: `
     <h1>NgMask</h1>
 
-    <input type="text" [(ngModel)]="money" [mask]="masks.money.mask" [maskOptions]="masks.money.options" />
+    <input type="text" [(ngModel)]="money" [mask]="masks.money" />
   `
 })
 export class AppComponent {
-  private readonly masks: { [type: string]: { mask: string, options?: MaskOptions } } = {
-    'date': { mask: '00/00/0000', options: { placeholder: 'Date' } },
-    'money': { mask: '#.##0,00', options: { reverse: true } },
-    'ipAddress': { mask: '099.099.099.099' }
+  private readonly masks: { [type: string]: Mask } = {
+    'date': { pattern: '00/00/0000', options: { placeholder: 'Date' } },
+    'money': { pattern: '#.##0,00', options: { reverse: true } },
+    'ipAddress': { pattern: '099.099.099.099' }
   };
 
   private money: number;
 }
 ```
-
-**NgMask Directives:**
-
-* **mask**: string (required);
-* **maskOptions**: implements MaskOptions Interface (optional).
