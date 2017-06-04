@@ -16,7 +16,9 @@ export class MaskDirective implements AfterContentInit {
   constructor(private elementRef: ElementRef, private ngControl: NgControl) { }
 
   ngAfterContentInit() {
-    $(this.elementRef.nativeElement).mask(this.mask.pattern, this.mask.options);
+    if (this.mask) {
+      $(this.elementRef.nativeElement).mask(this.mask.pattern, this.mask.options);
+    }
   }
 
   @HostListener('blur') onBlur() {

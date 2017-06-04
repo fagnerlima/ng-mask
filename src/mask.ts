@@ -1,4 +1,5 @@
 export interface MaskOptions {
+
   /**
    *
    * @type boolean [optional]
@@ -28,11 +29,13 @@ export interface MaskOptions {
    * @type Object [optional]
    */
   translation?: {
+
     /**
      *
      * @type string
      */
     [char: string]: {
+
       /**
        *
        * @type string
@@ -58,7 +61,7 @@ export interface Mask {
 
   /**
    *
-   * @type RegExp|string
+   * @type string
    */
   pattern: RegExp | string;
 
