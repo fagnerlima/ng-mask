@@ -1,13 +1,13 @@
 # NgMask
 
-[![](https://img.shields.io/badge/npm-v2.0.1-brightgreen.svg)](https://www.npmjs.com/package/@fagnerlima/ng-mask)
+[![](https://img.shields.io/badge/npm-v2.0.2-brightgreen.svg)](https://www.npmjs.com/package/@fagnerlima/ng-mask)
 
 NgMask is a [jQueryMaskPlugin](https://github.com/igorescobar/jQuery-Mask-Plugin) Adapter for Angular.
 
 ## Requirements
 
 * [jQuery](https://www.npmjs.com/package/jquery)
-* [jquery-mask-plugin](https://www.npmjs.com/package/jquery-mask-plugin)
+* [jQueryMaskPlugin](https://www.npmjs.com/package/jquery-mask-plugin)
 
 ## Usage
 
@@ -20,11 +20,7 @@ npm install @fagnerlima/ng-mask
 2. Import NgMaskModule into Module class:
 
 ```typescript
-import { BrowserModule }  from '@angular/platform-browser';
-import { NgModule }       from '@angular/core';
-import { FormsModule }    from '@angular/forms';
-
-import { AppComponent } from './app.component';
+// ...
 import { NgMaskModule } from '@fagnerlima/ng-mask';
 
 @NgModule({

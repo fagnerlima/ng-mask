@@ -16,7 +16,7 @@ export class MaskDirective implements AfterContentInit {
   constructor(private elementRef: ElementRef, private ngControl: NgControl) { }
 
   ngAfterContentInit() {
-    if (this.mask) {
+    if (this.mask && this.mask.pattern) {
       $(this.elementRef.nativeElement).mask(this.mask.pattern, this.mask.options);
     }
   }
