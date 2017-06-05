@@ -4,7 +4,11 @@
 
 All notable changes to this project will be documented in this file.
 
-### [2.1.1] - 2017-06-04
+### [2.0.2] - 2017-06-05
+
+- Fixed verification of null values in MaskDirective.
+
+### [2.0.1] - 2017-06-04
 
 - Fixed bug in pass of null values for Mask Directive.
 - Fixed type of pattern attribute in Mask Interface.
