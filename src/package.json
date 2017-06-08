@@ -1,6 +1,6 @@
 {
   "name": "@fagnerlima/ng-mask",
-  "version": "2.1.0-beta.2",
+  "version": "2.1.0",
   "description": "jQueryMaskPlugin Adapter for Angular",
   "repository": {
     "type": "git",
@@ -23,9 +23,9 @@
   "module": "ng-mask.js",
   "typings": "ng-mask.d.ts",
   "dependencies": {
-    "@angular/core": "^4.0.0",
-    "@angular/forms": "^4.0.0",
+    "@angular/core": "^4.1.3",
+    "@angular/forms": "^4.1.3",
     "jquery": "^3.2.1",
-    "jquery-mask-plugin": "^1.14.10"
+    "jquery-mask-plugin": "^1.14.11"
   }
 }
