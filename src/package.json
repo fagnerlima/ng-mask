@@ -23,13 +23,9 @@
   "module": "ng-mask.js",
   "typings": "ng-mask.d.ts",
   "dependencies": {
-    "@angular/common": "^4.0.0",
     "@angular/core": "^4.0.0",
     "@angular/forms": "^4.0.0",
-    "@angular/platform-browser": "^4.0.0",
     "jquery": "^3.2.1",
-    "jquery-mask-plugin": "^1.14.10",
-    "rxjs": "^5.1.0",
-    "zone.js": "^0.8.9"
+    "jquery-mask-plugin": "^1.14.10"
   }
 }
