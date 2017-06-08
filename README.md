@@ -104,8 +104,10 @@ const percentMaskMask: string = '##0,00%?reverse=true&placeholder=000,00%';
 
 | Supported Extra Options |
 |-|
+| clearIfNotMatch |
 | placeholder |
 | reverse |
+| selectOnFocus |
 
 ### Predefined Type Mask
 
