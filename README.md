@@ -96,14 +96,14 @@ const coordinateLongMask: string = 'coordinate-long';
 ```
 
 | Predefined Types |
-|---|---|---|---|---|
-| br-cep |
-| br-data |
-| br-cnpj |
-| br-cpf |
-| br-celular |
-| coordinate-lat |
-| coordinate-long |
+|------------------|
+| br-cep           |
+| br-data          |
+| br-cnpj          |
+| br-cpf           |
+| br-celular       |
+| coordinate-lat   |
+| coordinate-long  |
 
 ### Numeric Mask
 
