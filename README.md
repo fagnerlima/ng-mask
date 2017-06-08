@@ -123,15 +123,15 @@ const coordinateLongMask: string = 'coordinate-long';
 | br-moeda | ` new Mask('#.##0,00', { reverse: true }) ` |
 | br-telefone | ` new Mask('(00) 90000-0000') ` |
 | us-phone | ` new Mask('(000) 000-0000') ` |
-| coordinate-lat | ` new Mask('000º00.0000\'~', { translation: { '~': { pattern: /[N|S]/ } } }) ` |
-| coordinate-long | ` new Mask('000º00.0000\'~', { translation: { '~': { pattern: /[N|S]/ } } }) ` |
+| coordinate-lat | ` new Mask('000º00.0000\'~', { translation: { '~': { pattern: /[N&#124;S]/ } } }) ` |
+| coordinate-long | ` new Mask('000º00.0000\'~', { translation: { '~': { pattern: /[N&#124;S]/ } } }) ` |
 | date | ` new Mask('00/00/0000') ` |
 | date-time | ` new Mask('00/00/0000 00:00:00') ` |
 | time | ` new Mask('00:00:00') ` |
 
 ### Numeric Mask
 
-String that contains a numeric type (** integer ** or ** decimal **) with your ** precision ** (and ** scale ** for decimal type), similar to many databases.
+String that contains a numeric type with your **precision** (and **scale** for decimal type), similar to many databases.
 
 ```typescript
 const integerMask: string = 'integer(6)';
