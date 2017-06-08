@@ -28,15 +28,18 @@ export class MaskDirective implements AfterContentInit {
     }
 
     if (this.mask instanceof Mask && this.mask.pattern) {
-      $(this.elementRef.nativeElement).mask(this.mask.pattern, this.mask.options);
+      this.setInputMask(this.mask);
     } else if (typeof this.mask === 'string' && this.mask.length > 0) {
       const mask: Mask = this.maskService.createMask(this.mask);
-      console.log(mask);
 
       if (mask) {
-        $(this.elementRef.nativeElement).mask(mask.pattern, mask.options);
+        this.setInputMask(mask);
       }
     }
+  }
+
+  private setInputMask(mask: Mask) {
+    $(this.elementRef.nativeElement).mask(mask.pattern, mask.options);
   }
 
   @HostListener('blur') onBlur() {
