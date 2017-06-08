@@ -98,11 +98,14 @@ const dateMask: string = '00/00/0000';
 
 String in the QueryString format that contains the pattern and extra options of Mask class.
 
-*At the moment, only reverse option is supported.*
-
 ```typescript
-const percentMaskMask: string = '##0,00%?reverse=true';
+const percentMaskMask: string = '##0,00%?reverse=true&placeholder=000,00%';
 ```
+
+| Supported Extra Options |
+|-|
+| placeholder |
+| reverse |
 
 ### Predefined Type Mask
 
