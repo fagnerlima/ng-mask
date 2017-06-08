@@ -57,17 +57,23 @@ export interface MaskOptions {
   };
 }
 
-export interface Mask {
+export class Mask {
 
   /**
-   *
-   * @type string
+   * Mask constructor.
+   * @param string pattern
+   * @param MaskOptions options
    */
-  pattern: RegExp | string;
+  public constructor(
+    private _pattern: string,
+    private _options: MaskOptions = null
+  ) { }
 
-  /**
-   *
-   * @type MaskOptions [optional]
-   */
-  options?: MaskOptions;
+  public get pattern(): string {
+    return this._pattern;
+  }
+
+  public get options(): MaskOptions {
+    return this._options;
+  }
 }
