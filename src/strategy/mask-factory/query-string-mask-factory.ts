@@ -30,17 +30,27 @@ export class QueryStringMaskFactory extends MaskFactory {
         this.setOptionPlaceholder(option);
       } else if (option.startsWith('reverse')) {
         this.setOptionReverse(option);
-      } else if (option.startsWith('translation')) {
-        //
+      } else if (option.startsWith('clearIfNotMatch')) {
+        this.setOptionClearIfNotMatch(option);
+      } else if (option.startsWith('selectOnFocus')) {
+        this.setOptionSelectOnFocus(option);
       }
     }
+  }
+
+  private setOptionPlaceholder(option: string) {
+    this.options.placeholder = option.split('=')[1];
   }
 
   private setOptionReverse(option: string) {
     this.options.reverse = 'true' === option.split('=')[1] ? true : false;
   }
 
-  private setOptionPlaceholder(option: string) {
-    this.options.placeholder = option.split('=')[1];
+  private setOptionClearIfNotMatch(option: string) {
+    this.options.clearIfNotMatch = 'true' === option.split('=')[1] ? true : false;
+  }
+
+  private setOptionSelectOnFocus(option: string) {
+    this.options.selectOnFocus = 'true' === option.split('=')[1] ? true : false;
   }
 }
