@@ -51,14 +51,14 @@ import { Mask } from '@fagnerlima/ng-mask';
 export class AppComponent {
 
   // Masks
-  readonly maskCep: string = 'br-cep';
-  readonly maskCoordinateLat: string = 'coordinate-lat';
-  readonly maskCoordinateLong: string = 'coordinate-long';
+  readonly maskCep: string = 'brCep';
+  readonly maskCoordinateLat: string = 'coordinateLat';
+  readonly maskCoordinateLong: string = 'coordinateLong';
+  readonly maskCpf: Mask = new Mask('000.000.000-00');
   readonly maskDecimal: string = 'decimal(5,2)';
   readonly maskInteger: string = 'integer(6)';
   readonly maskMoney: string = '#0.00?reverse=true';
   readonly maskPhone: string = '(00) 90000-0000';
-  readonly maskCpf: Mask = new Mask('000.000.000-00');
 
   // Controls
   money: string;
@@ -99,7 +99,7 @@ const dateMask: string = '00/00/0000';
 String in the QueryString format that contains the pattern and extra options of Mask class.
 
 ```typescript
-const percentMaskMask: string = '##0,00%?reverse=true&placeholder=000,00%';
+const percentMask: string = '##0,00%?reverse=true&placeholder=000,00%';
 ```
 
 | Supported Extra Options |
@@ -114,8 +114,8 @@ const percentMaskMask: string = '##0,00%?reverse=true&placeholder=000,00%';
 String that contains a predefined type.
 
 ```typescript
-const coordinateLatMask: string = 'coordinate-lat';
-const coordinateLongMask: string = 'coordinate-long';
+const coordinateLatMask: string = 'coordinateLat';
+const coordinateLongMask: string = 'coordinateLong';
 ```
 
 | Predefined Types | Pattern |
