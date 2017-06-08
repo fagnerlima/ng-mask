@@ -4,6 +4,10 @@
 
 All notable changes to this project will be documented in this file.
 
+### [2.1.0] - 2017-06-05
+
+- Implemented strategy for new Mask Types (Predefined Type, Numeric, QueryString and Default Mask).
+
 ### [2.0.2] - 2017-06-05
 
 - Fixed verification of null values in MaskDirective.

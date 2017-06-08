@@ -1,73 +1,90 @@
+/**
+ * Translation Option for NgMask.
+ */
+export interface TranslationMask {
+
+  /**
+   * Joker in the mask.
+   * @type string char
+   */
+  [char: string]: {
+
+    /**
+     * Pattern to the joker.
+     * @type string pattern
+     */
+    pattern: RegExp;
+
+    /**
+     * Becomes the joker optional.
+     * @type boolean [optional]
+     */
+    optional?: boolean;
+
+    /**
+     * Becomes the joker recursive.
+     * @type boolean [optional]
+     */
+    recursive?: boolean;
+  };
+}
+
+/**
+ * Extra Options for NgMask.
+ */
 export interface MaskOptions {
 
   /**
-   *
-   * @type boolean [optional]
+   * Clears the form input if your value not match the mask.
+   * @type boolean clearIfNotMatch Default value: false
    */
   clearIfNotMatch?: boolean;
 
   /**
-   *
-   * @type string [optional]
+   * Adds a placeholder in the form input.
+   * @type string placeholder Default value: ''
    */
   placeholder?: string;
 
   /**
-   *
-   * @type boolean [optional]
+   * Becomes the mask reversible.
+   * @type boolean reverse Default value: false
    */
   reverse?: boolean;
 
   /**
-   *
-   * @type boolean [optional]
+   * Selects the form input's content when the cursor focus above.
+   * @type boolean selectOnFocus Default value: false
    */
   selectOnFocus?: boolean;
 
   /**
-   *
-   * @type Object [optional]
+   * Translates jokers in the mask according the necessity of user.
+   * @type Object translation
    */
-  translation?: {
-
-    /**
-     *
-     * @type string
-     */
-    [char: string]: {
-
-      /**
-       *
-       * @type string
-       */
-      pattern: RegExp;
-
-      /**
-       *
-       * @type boolean [optional]
-       */
-      optional?: boolean;
-
-      /**
-       *
-       * @type boolean [optional]
-       */
-      recursive?: boolean;
-    }
-  };
+  translation?: TranslationMask;
 }
 
-export interface Mask {
+/**
+ * Mask for NgMask.
+ */
+export class Mask {
 
   /**
-   *
-   * @type string
+   * Mask constructor.
+   * @param string pattern Mask pattern.
+   * @param MaskOptions options Extra options for the mask.
    */
-  pattern: RegExp | string;
+  public constructor(
+    private _pattern: string,
+    private _options: MaskOptions = null
+  ) { }
 
-  /**
-   *
-   * @type MaskOptions [optional]
-   */
-  options?: MaskOptions;
+  public get pattern(): string {
+    return this._pattern;
+  }
+
+  public get options(): MaskOptions {
+    return this._options;
+  }
 }

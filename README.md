@@ -1,6 +1,6 @@
 # NgMask
 
-[![](https://img.shields.io/badge/npm-v2.0.2-brightgreen.svg)](https://www.npmjs.com/package/@fagnerlima/ng-mask)
+[![](https://img.shields.io/badge/npm-v2.1.0-brightgreen.svg)](https://www.npmjs.com/package/@fagnerlima/ng-mask)
 
 NgMask is a [jQueryMaskPlugin](https://github.com/igorescobar/jQuery-Mask-Plugin) Adapter for Angular.
 
@@ -33,7 +33,7 @@ import { NgMaskModule } from '@fagnerlima/ng-mask';
 export class AppModule { }
 ```
 
-3. Insert the directives in form's components with ngControl (ex. ngModel or formControlName):
+3. Insert the directives in form's inputs with ngControl (ex. ngModel or formControlName):
 
 ```typescript
 import { Component } from '@angular/core';
@@ -45,16 +45,105 @@ import { Mask } from '@fagnerlima/ng-mask';
   template: `
     <h1>NgMask</h1>
 
-    <input type="text" [(ngModel)]="money" [mask]="masks.money" />
+    <input type="text" [(ngModel)]="money" [mask]="maskMoney" />
   `
 })
 export class AppComponent {
-  private readonly masks: { [type: string]: Mask } = {
-    'date': { pattern: '00/00/0000', options: { placeholder: 'Date' } },
-    'money': { pattern: '#.##0,00', options: { reverse: true } },
-    'ipAddress': { pattern: '099.099.099.099' }
-  };
 
-  private money: number;
+  // Masks
+  readonly maskCep: string = 'brCep';
+  readonly maskCoordinateLat: string = 'coordinateLat';
+  readonly maskCoordinateLong: string = 'coordinateLong';
+  readonly maskCpf: Mask = new Mask('000.000.000-00');
+  readonly maskDecimal: string = 'decimal(5,2)';
+  readonly maskInteger: string = 'integer(6)';
+  readonly maskMoney: string = '#0.00?reverse=true';
+  readonly maskPhone: string = '(00) 90000-0000';
+
+  // Controls
+  money: string;
 }
 ```
+
+## Mask Types
+
+### Mask Object
+
+Instance of Mask class.
+
+```typescript
+import { Mask } from '@fagnerlima/ng-mask';
+
+const dateMask: Mask = new Mask('00/00/0000');
+const percentMask: Mask = new Mask('##0,00%', { reverse: true })
+```
+
+### Default Mask
+
+String that represents pattern attribute of Mask class, using default jokers of jQueryMaskPlugin, without extra options.
+
+```typescript
+const dateMask: string = '00/00/0000';
+```
+
+| Patterns | jQueryMaskPlugin's Default Configuration |
+|-|-|
+| 0 | { pattern: /\d/ } |
+| 9 | { pattern: /\d/, optional: true } |
+| # | { pattern: /\d/, recursive: true } |
+| A | { pattern: /[a-zA-Z0-9/ } |
+| S | { pattern: /[a-zA-Z]/ } |
+
+### QueryString Mask
+
+String in the QueryString format that contains the pattern and extra options of Mask class.
+
+```typescript
+const percentMask: string = '##0,00%?reverse=true&placeholder=000,00%';
+```
+
+| Supported Extra Options |
+|-|
+| clearIfNotMatch |
+| placeholder |
+| reverse |
+| selectOnFocus |
+
+### Predefined Type Mask
+
+String that contains a predefined type.
+
+```typescript
+const coordinateLatMask: string = 'coordinateLat';
+const coordinateLongMask: string = 'coordinateLong';
+```
+
+| Predefined Types | Pattern |
+|-|-|
+| brCelular | new Mask('(00) 90000-0000') |
+| brCep | new Mask('00000-000') |
+| brCnpj | new Mask('00.000.000/0000-00') |
+| brCpf | new Mask('000.000.000-00') |
+| brData | new Mask('00/00/0000') |
+| brMoeda | new Mask('#.##0,00', { reverse: true }) |
+| brTelefone | new Mask('(00) 90000-0000') |
+| usPhone | new Mask('(000) 000-0000') |
+| coordinateLat | new Mask('000º00.0000\'~', { translation: { '~': { pattern: /[N\|S]/ } } }) |
+| coordinateLong | new Mask('000º00.0000\'~', { translation: { '~': { pattern: /[N\|S]/ } } }) |
+| date | new Mask('00/00/0000') |
+| dateTime | new Mask('00/00/0000 00:00:00') |
+| time | new Mask('00:00:00') |
+
+### Numeric Mask
+
+String that contains a numeric type with your **precision** (and **scale** for decimal type), similar to many databases.
+
+```typescript
+const integerMask: string = 'integer(6)';
+const decimalMask: string = 'decimal(10,2)';
+```
+
+| Numeric Types | Examples |
+|-|-|
+| integer | integer(6) |
+| decimal | decimal(5,2) |
