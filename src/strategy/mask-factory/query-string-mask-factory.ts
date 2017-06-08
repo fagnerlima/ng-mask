@@ -26,7 +26,9 @@ export class QueryStringMaskFactory extends MaskFactory {
     const options: string[] = queryString.split('&');
 
     for (const option of options) {
-      if (option.startsWith('reverse')) {
+      if (option.startsWith('placeholder')) {
+        this.setOptionPlaceholder(option);
+      } else if (option.startsWith('reverse')) {
         this.setOptionReverse(option);
       } else if (option.startsWith('translation')) {
         //
@@ -36,5 +38,9 @@ export class QueryStringMaskFactory extends MaskFactory {
 
   private setOptionReverse(option: string) {
     this.options.reverse = 'true' === option.split('=')[1] ? true : false;
+  }
+
+  private setOptionPlaceholder(option: string) {
+    this.options.placeholder = option.split('=')[1];
   }
 }
