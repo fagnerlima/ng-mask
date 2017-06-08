@@ -128,8 +128,8 @@ const coordinateLongMask: string = 'coordinate-long';
 | brMoeda | new Mask('#.##0,00', { reverse: true }) |
 | brTelefone | new Mask('(00) 90000-0000') |
 | usPhone | new Mask('(000) 000-0000') |
-| coordinateLat | new Mask('000º00.0000\'~', { translation: { '~': { pattern: /[N|S]/ } } }) |
-| coordinateLong | new Mask('000º00.0000\'~', { translation: { '~': { pattern: /[N|S]/ } } }) |
+| coordinateLat | new Mask('000º00.0000\'~', { translation: { '~': { pattern: /[N\|S]/ } } }) |
+| coordinateLong | new Mask('000º00.0000\'~', { translation: { '~': { pattern: /[N\|S]/ } } }) |
 | date | new Mask('00/00/0000') |
 | dateTime | new Mask('00/00/0000 00:00:00') |
 | time | new Mask('00:00:00') |
