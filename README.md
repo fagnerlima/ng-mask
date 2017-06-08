@@ -33,7 +33,7 @@ import { NgMaskModule } from '@fagnerlima/ng-mask';
 export class AppModule { }
 ```
 
-3. Insert the directives in form's components with ngControl (ex. ngModel or formControlName):
+3. Insert the directives in form's inputs with ngControl (ex. ngModel or formControlName):
 
 ```typescript
 import { Component } from '@angular/core';
@@ -50,8 +50,18 @@ import { Mask } from '@fagnerlima/ng-mask';
 })
 export class AppComponent {
 
-  protected money: string;
-  protected maskMoney: string = '#0.00?reverse=true';
+  // Masks
+  readonly maskCep: string = 'br-cep';
+  readonly maskCoordinateLat: string = 'coordinate-lat';
+  readonly maskCoordinateLong: string = 'coordinate-long';
+  readonly maskDecimal: string = 'decimal(5,2)';
+  readonly maskInteger: string = 'integer(6)';
+  readonly maskMoney: string = '#0.00?reverse=true';
+  readonly maskPhone: string = '(00) 90000-0000';
+  readonly maskCpf: Mask = new Mask('000.000.000-00');
+
+  // Controls
+  money: string;
 }
 ```
 
@@ -70,11 +80,19 @@ const percentMask: Mask = new Mask('##0,00%', { reverse: true })
 
 ### Default Mask
 
-String that represents pattern attribute of Mask class, using default patterns of jQueryMaskPlugin, without extra options.
+String that represents pattern attribute of Mask class, using default jokers of jQueryMaskPlugin, without extra options.
 
 ```typescript
 const dateMask: string = '00/00/0000';
 ```
+
+| Patterns | jQueryMaskPlugin's Default Configuration |
+|-|-|
+| 0 | ``` { pattern: /\d/ } ``` |
+| 9 | ``` { pattern: /\d/, optional: true } ``` |
+| # | ``` { pattern: /\d/, recursive: true } ``` |
+| A | ``` { pattern: /[a-zA-Z0-9/ } ``` |
+| S | ``` { pattern: /[a-zA-Z]/ } ``` |
 
 ### QueryString Mask
 
@@ -95,21 +113,32 @@ const coordinateLatMask: string = 'coordinate-lat';
 const coordinateLongMask: string = 'coordinate-long';
 ```
 
-| Predefined Types |
-|------------------|
-| br-cep           |
-| br-data          |
-| br-cnpj          |
-| br-cpf           |
-| br-celular       |
-| coordinate-lat   |
-| coordinate-long  |
+| Predefined Types | Pattern |
+|-|-|
+| br-celular | ` new Mask('(00) 90000-0000') ` |
+| br-cep | ` new Mask('00000-000') ` |
+| br-data | ` new Mask('00/00/0000') ` |
+| br-cnpj | ` new Mask('00.000.000/0000-00') ` |
+| br-cpf | ` new Mask('000.000.000-00') ` |
+| br-moeda | ` new Mask('#.##0,00', { reverse: true }) ` |
+| br-telefone | ` new Mask('(00) 90000-0000') ` |
+| us-phone | ` new Mask('(000) 000-0000') ` |
+| coordinate-lat | ` new Mask('000º00.0000\'~', { translation: { '~': { pattern: /[N|S]/ } } }) ` |
+| coordinate-long | ` new Mask('000º00.0000\'~', { translation: { '~': { pattern: /[N|S]/ } } }) ` |
+| date | ` new Mask('00/00/0000') ` |
+| date-time | ` new Mask('00/00/0000 00:00:00') ` |
+| time | ` new Mask('00:00:00') ` |
 
 ### Numeric Mask
 
-String that contains a numeric type (**integer** or **decimal**) with your **precision** (and **scale** for decimal type).
+String that contains a numeric type (** integer ** or ** decimal **) with your ** precision ** (and ** scale ** for decimal type), similar to many databases.
 
 ```typescript
 const integerMask: string = 'integer(6)';
 const decimalMask: string = 'decimal(10,2)';
 ```
+
+| Numeric Types | Examples |
+|-|-|
+| integer | ` integer(6) ` |
+| decimal | ` decimal(5,2) ` |
