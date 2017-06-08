@@ -45,16 +45,71 @@ import { Mask } from '@fagnerlima/ng-mask';
   template: `
     <h1>NgMask</h1>
 
-    <input type="text" [(ngModel)]="money" [mask]="masks.money" />
+    <input type="text" [(ngModel)]="money" [mask]="maskMoney" />
   `
 })
 export class AppComponent {
-  private readonly masks: { [type: string]: Mask } = {
-    'date': { pattern: '00/00/0000', options: { placeholder: 'Date' } },
-    'money': { pattern: '#.##0,00', options: { reverse: true } },
-    'ipAddress': { pattern: '099.099.099.099' }
-  };
 
-  private money: number;
+  protected money: string;
+  protected maskMoney: string = '#0.00?reverse=true';
 }
+```
+
+## Mask's Types
+
+### Mask Object
+
+Instance of Mask class.
+
+```typescript
+import { Mask } from '@fagnerlima/ng-mask';
+
+const dateMask: Mask = new Mask('00/00/0000');
+const percentMask: Mask = new Mask('##0,00%', { reverse: true })
+```
+
+### Default Mask
+
+String that represents pattern attribute of Mask class, using default patterns of jQueryMaskPlugin, without extra options.
+
+```typescript
+const dateMask: string = '00/00/0000';
+```
+
+### QueryString Mask
+
+String in the QueryString format that contains the pattern and extra options of Mask class.
+
+*At the moment, only reverse option is supported.*
+
+```typescript
+const percentMaskMask: string = '##0,00%?reverse=true';
+```
+
+### Predefined Type Mask
+
+String that contains a predefined type.
+
+```typescript
+const coordinateLatMask: string = 'coordinate-lat';
+const coordinateLongMask: string = 'coordinate-long';
+```
+
+| Predefined Types |
+|---|---|---|---|---|
+| br-cep |
+| br-data |
+| br-cnpj |
+| br-cpf |
+| br-celular |
+| coordinate-lat |
+| coordinate-long |
+
+### Numeric Mask
+
+String that contains a numeric type (**integer** or **decimal**) with your **precision** (and **scale** for decimal type).
+
+```typescript
+const integerMask: string = 'integer(6)';
+const decimalMask: string = 'decimal(10,2)';
 ```
