@@ -10,5 +10,7 @@ export class DefaultMask extends MaskFactoryHandler {
 
       return new DefaultMaskFactory(mask);
     }
+
+    return super.handle(mask);
   }
 }

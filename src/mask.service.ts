@@ -22,6 +22,7 @@ export class MaskService {
 
       return maskFactory.create();
     } catch (error) {
+      console.error(`[NgMask] ${error.name}: ${error.message}`);
 
       return null;
     }
