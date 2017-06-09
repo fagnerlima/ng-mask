@@ -11,7 +11,7 @@ const predefinedMasks: { [type: string]: Mask } = {
   'brTelefone': new Mask('(00) 0000-0000'),
   'usPhone': new Mask('(000) 000-0000'),
   'coordinateLat': new Mask('000º00.0000\'~', { translation: { '~': { pattern: /[N|S]/ } } }),
-  'coordinateLong': new Mask('000º00.0000\'~', { translation: { '~': { pattern: /[N|S]/ } } }),
+  'coordinateLong': new Mask('000º00.0000\'~', { translation: { '~': { pattern: /[E|W]/ } } }),
   'date': new Mask('00/00/0000'),
   'dateTime': new Mask('00/00/0000 00:00:00'),
   'time': new Mask('00:00:00')
