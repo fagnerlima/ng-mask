@@ -1,6 +1,6 @@
 # NgMask
 
-[![](https://img.shields.io/badge/npm-v2.1.1-brightgreen.svg)](https://www.npmjs.com/package/@fagnerlima/ng-mask)
+[![](https://img.shields.io/badge/npm-v2.1.2-brightgreen.svg)](https://www.npmjs.com/package/@fagnerlima/ng-mask)
 
 NgMask is a [jQueryMaskPlugin](https://github.com/igorescobar/jQuery-Mask-Plugin) Adapter for Angular.
 
@@ -33,7 +33,7 @@ import { NgMaskModule } from '@fagnerlima/ng-mask';
 export class AppModule { }
 ```
 
-3. Insert the directives in form's inputs with ngControl (ex. ngModel or formControlName):
+3. Insert the directive in form inputs with ngControl (ex. ngModel or formControlName):
 
 ```typescript
 import { Component } from '@angular/core';
@@ -55,7 +55,7 @@ export class AppComponent {
   readonly maskCoordinateLat: string = 'coordinateLat';
   readonly maskCoordinateLong: string = 'coordinateLong';
   readonly maskCpf: Mask = new Mask('000.000.000-00');
-  readonly maskDecimal: string = 'decimal(5,2)';
+  readonly maskDecimal: string = 'decimal(10,2)';
   readonly maskInteger: string = 'integer(6)';
   readonly maskMoney: string = '#0.00?reverse=true';
   readonly maskPhone: string = '(00) 00000-0000';
@@ -120,7 +120,7 @@ const coordinateLongMask: string = 'coordinateLong';
 
 | Predefined Types | Pattern | Example |
 |-|-|-|
-| brCelular | new Mask('(00) 90000-0000') | (11) 95683-1298 |
+| brCelular | new Mask('(00) 00009-0000') | (11) 95683-1298 |
 | brCep | new Mask('00000-000') | 58035-110 |
 | brCnpj | new Mask('00.000.000/0000-00') | 13.456.131/0000-12 |
 | brCpf | new Mask('000.000.000-00') | 034.465.789-13 |
