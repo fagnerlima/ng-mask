@@ -4,7 +4,11 @@
 
 All notable changes to this project will be documented in this file.
 
-### [2.1.0] - 2017-06-05
+### [2.1.1] - 2017-06-09
+
+- Fixed Predefined Type Masks brCelular, brTelefone and coordinateLong.
+
+### [2.1.0] - 2017-06-08
 
 - Implemented strategy for new Mask Types (Predefined Type, Numeric, QueryString and Default Mask).
 

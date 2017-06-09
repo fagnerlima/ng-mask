@@ -1,6 +1,6 @@
 # NgMask
 
-[![](https://img.shields.io/badge/npm-v2.1.0-brightgreen.svg)](https://www.npmjs.com/package/@fagnerlima/ng-mask)
+[![](https://img.shields.io/badge/npm-v2.1.1-brightgreen.svg)](https://www.npmjs.com/package/@fagnerlima/ng-mask)
 
 NgMask is a [jQueryMaskPlugin](https://github.com/igorescobar/jQuery-Mask-Plugin) Adapter for Angular.
 
@@ -58,7 +58,7 @@ export class AppComponent {
   readonly maskDecimal: string = 'decimal(5,2)';
   readonly maskInteger: string = 'integer(6)';
   readonly maskMoney: string = '#0.00?reverse=true';
-  readonly maskPhone: string = '(00) 90000-0000';
+  readonly maskPhone: string = '(00) 00000-0000';
 
   // Controls
   money: string;
@@ -118,21 +118,21 @@ const coordinateLatMask: string = 'coordinateLat';
 const coordinateLongMask: string = 'coordinateLong';
 ```
 
-| Predefined Types | Pattern |
-|-|-|
-| brCelular | new Mask('(00) 90000-0000') |
-| brCep | new Mask('00000-000') |
-| brCnpj | new Mask('00.000.000/0000-00') |
-| brCpf | new Mask('000.000.000-00') |
-| brData | new Mask('00/00/0000') |
-| brMoeda | new Mask('#.##0,00', { reverse: true }) |
-| brTelefone | new Mask('(00) 90000-0000') |
-| usPhone | new Mask('(000) 000-0000') |
-| coordinateLat | new Mask('000º00.0000\'~', { translation: { '~': { pattern: /[N\|S]/ } } }) |
-| coordinateLong | new Mask('000º00.0000\'~', { translation: { '~': { pattern: /[N\|S]/ } } }) |
-| date | new Mask('00/00/0000') |
-| dateTime | new Mask('00/00/0000 00:00:00') |
-| time | new Mask('00:00:00') |
+| Predefined Types | Pattern | Example |
+|-|-|-|
+| brCelular | new Mask('(00) 90000-0000') | (11) 95683-1298 |
+| brCep | new Mask('00000-000') | 58035-110 |
+| brCnpj | new Mask('00.000.000/0000-00') | 13.456.131/0000-12 |
+| brCpf | new Mask('000.000.000-00') | 034.465.789-13 |
+| brData | new Mask('00/00/0000') | 15/10/2016 |
+| brMoeda | new Mask('#.##0,00', { reverse: true }) | 2.199,99 |
+| brTelefone | new Mask('(00) 0000-0000') | (83) 3638-8973 |
+| usPhone | new Mask('(000) 000-0000') | (581) 555-5895 |
+| coordinateLat | new Mask('000º00.0000\'~', { translation: { '~': { pattern: /[N\|S]/ } } }) | 123º54.7894'N |
+| coordinateLong | new Mask('000º00.0000\'~', { translation: { '~': { pattern: /[E\|W]/ } } }) | 354º79.6452'E |
+| date | new Mask('00/00/0000') | 01/31/2017 |
+| dateTime | new Mask('00/00/0000 00:00:00') | 05/18/2017 08:30:00 |
+| time | new Mask('00:00:00') | 19:15:00 |
 
 ### Numeric Mask
 
