@@ -4,6 +4,10 @@
 
 All notable changes to this project will be documented in this file.
 
+### [2.1.2] - 2017-06-09
+
+- Fixed Numeric Masks for the cases when the precision or scale contains more than one digit.
+
 ### [2.1.1] - 2017-06-09
 
 - Fixed Predefined Type Masks brCelular, brTelefone and coordinateLong.

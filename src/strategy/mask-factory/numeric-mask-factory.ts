@@ -1,7 +1,7 @@
 import { MaskFactory } from './mask-factory';
 import { Mask } from '../../mask';
 
-const numericMaskRegex: RegExp = /^(integer\(\d\)|decimal\(\d,\d\))$/;
+const numericMaskRegex: RegExp = /^(integer\(\d+\)|decimal\(\d+,\d+\))$/;
 
 export class NumericMaskFactory extends MaskFactory {
 
@@ -16,7 +16,7 @@ export class NumericMaskFactory extends MaskFactory {
       return null;
     }
 
-    const numberMaskRegex: RegExp = /^(decimal|integer)\((\d|\d,\d)\)$/;
+    const numberMaskRegex: RegExp = /^(decimal|integer)\((\d+|\d+,\d+)\)$/;
     const numberType: string = numberMaskRegex.exec(this.mask)[1];
     const numberDefinition: string = numberMaskRegex.exec(this.mask)[2];
 
