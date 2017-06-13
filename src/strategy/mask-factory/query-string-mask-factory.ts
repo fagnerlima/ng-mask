@@ -1,13 +1,13 @@
 import { MaskFactory } from './mask-factory';
 import { Mask } from '../../mask';
 
-const queryStringMaskegex: RegExp = /^[^?]+\?([a-zA-Z][a-zA-Z\d-_]+=[^&?=]+)(&([a-zA-Z][a-zA-Z\d-_]+=[^&?=]+))*$/;
+const queryStringMaskRegex: RegExp = /^[^?]+\?([a-zA-Z][a-zA-Z\d-_]+=[^&?=]+)(&([a-zA-Z][a-zA-Z\d-_]+=[^&?=]+))*$/;
 
 export class QueryStringMaskFactory extends MaskFactory {
 
   public static isQueryStringMask(mask: string): boolean {
 
-    return queryStringMaskegex.test(mask);
+    return queryStringMaskRegex.test(mask);
   }
 
   public create(): Mask {

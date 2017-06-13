@@ -24,7 +24,7 @@
     "strictMetadataEmit": true,
     "skipTemplateCodegen": true,
     "flatModuleOutFile": "ng-mask.js",
-    "flatModuleId": "ng-mask"
+    "flatModuleId": "@fagnerlima/ng-mask"
   },
   "files": [
     "./index.ts"
