@@ -4,6 +4,11 @@
 
 All notable changes to this project will be documented in this file.
 
+### [2.1.4] - 2017-06-13
+
+#### Update
+- Version of angular dependencies.
+
 ### [2.1.3] - 2017-06-13
 
 #### Bug/Fix
