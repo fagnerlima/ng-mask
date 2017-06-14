@@ -25,7 +25,7 @@
   "dependencies": {
     "@angular/core": ">=2.4.10",
     "@angular/forms": ">=2.4.10",
-    "jquery": "^3.2.1",
-    "jquery-mask-plugin": "^1.14.11"
+    "jquery": ">=3.2.1",
+    "jquery-mask-plugin": ">=1.14.11"
   }
 }
