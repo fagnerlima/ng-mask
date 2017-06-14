@@ -4,6 +4,15 @@
 
 All notable changes to this project will be documented in this file.
 
+### [2.2.0] - 2017-06-14
+
+#### Update
+- Compatibility extension:
+  - **@angular/core**: 2.4.10 or higher;
+  - **@angular/forms**: 2.4.10 or higher;
+  - **jQuery**: 3.2.1 or higher;
+  - **jQueryMaskPlugin**: 1.14.11 or higher.
+
 ### [2.1.4] - 2017-06-13
 
 #### Update
