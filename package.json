@@ -1,6 +1,6 @@
 {
   "name": "@fagnerlima/ng-mask",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "description": "jQueryMaskPlugin Adapter for Angular",
   "scripts": {
     "build": "./build.sh",
@@ -10,7 +10,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/fagnerlima91/ng-mask.git"
+    "url": "git+https://github.com/fagnerlima/ng-mask.git"
   },
   "author": {
     "name": "Fagner Lima",
@@ -24,7 +24,7 @@
   ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/fagnerlima91/ng-mask/issues"
+    "url": "https://github.com/fagnerlima/ng-mask/issues"
   },
   "devDependencies": {
     "@angular/cli": "^1.1.1",
