@@ -4,6 +4,11 @@
 
 All notable changes to this project will be documented in this file.
 
+### [2.2.1] - 2017-06-16
+
+#### Update
+- GitHub Repository (fagnerlima91 -> fagnerlima).
+
 ### [2.2.0] - 2017-06-14
 
 #### Update
