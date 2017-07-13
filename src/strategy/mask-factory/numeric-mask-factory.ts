@@ -1,7 +1,7 @@
 import { MaskFactory } from './mask-factory';
 import { Mask } from '../../mask';
 
-const numericMaskRegex: RegExp = /^(integer\(\d+\)|decimal\(\d+,\d+\))$/;
+const numericMaskRegex: RegExp = /^(integer\(\d\)|decimal\(\d,\d\))$/;
 
 export class NumericMaskFactory extends MaskFactory {
 
@@ -16,7 +16,7 @@ export class NumericMaskFactory extends MaskFactory {
       return null;
     }
 
-    const numberMaskRegex: RegExp = /^(decimal|integer)\((\d+|\d+,\d+)\)$/;
+    const numberMaskRegex: RegExp = /^(decimal|integer)\((\d|\d,\d)\)$/;
     const numberType: string = numberMaskRegex.exec(this.mask)[1];
     const numberDefinition: string = numberMaskRegex.exec(this.mask)[2];
 
@@ -35,26 +35,26 @@ export class NumericMaskFactory extends MaskFactory {
     return new Mask(this.pattern, this.options);
   }
 
-  private mountIntegerMask(precision: number) {
-    let pattern = '';
+  private mountIntegerMask(precision: number): void {
+    let pattern: string = '';
 
-    for (let i = 1; i <= precision; i++) {
+    for (let i: number = 1; i <= precision; i++) {
       pattern += '0';
     }
 
     this.pattern = pattern;
   }
 
-  private mountDecimalMask(precision: number, scale: number) {
-    let pattern = '';
+  private mountDecimalMask(precision: number, scale: number): void {
+    let pattern: string = '';
 
-    for (let i = 1; i <= precision - scale; i++) {
+    for (let i: number = 1; i <= precision - scale; i++) {
       pattern += '0';
     }
 
     pattern += '.';
 
-    for (let i = 1; i <= scale; i++) {
+    for (let i: number = 1; i <= scale; i++) {
       pattern += '0';
     }
 

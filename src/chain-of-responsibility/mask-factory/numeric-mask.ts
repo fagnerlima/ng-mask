@@ -5,6 +5,7 @@ import { NumericMaskFactory } from '../../strategy/mask-factory/numeric-mask-fac
 export class NumericMask extends MaskFactoryHandler {
 
   public handle(mask: string): MaskFactory {
+
     if (NumericMaskFactory.isNumericMask(mask)) {
 
       return new NumericMaskFactory(mask);

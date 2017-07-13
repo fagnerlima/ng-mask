@@ -5,6 +5,7 @@ import { DefaultMaskFactory } from '../../strategy/mask-factory/default-mask-fac
 export class DefaultMask extends MaskFactoryHandler {
 
   public handle(mask: string): MaskFactory {
+
     if (DefaultMaskFactory.isDefaultMask(mask)) {
 
       return new DefaultMaskFactory(mask);

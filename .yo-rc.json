@@ -1,0 +1,13 @@
+{
+  "generator-angular-library": {
+    "githubUsername": "fagnerlima",
+    "githubRepoName": "ng-mask",
+    "npmModuleName": "@fagnerlima/ng-mask",
+    "moduleGlobal": "ng-mask",
+    "ngModuleName": "NgMaskModule",
+    "selectorPrefix": "fl",
+    "projectTitle": "Ng Mask",
+    "projectDescription": "A jQueryMaskPlugin Adapter for Angular.",
+    "authorName": "Fagner Lima"
+  }
+}

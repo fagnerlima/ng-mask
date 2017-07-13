@@ -12,10 +12,10 @@ import { Mask } from './mask';
 export class MaskService {
 
   public createMask(mask: string): Mask {
-    const maskFactoryHandler: MaskFactoryHandler = new QueryStringMask();
-    maskFactoryHandler.append(new NumericMask());
-    maskFactoryHandler.append(new PredefinedTypeMask());
-    maskFactoryHandler.append(new DefaultMask());
+    const maskFactoryHandler: MaskFactoryHandler = (new QueryStringMask())
+      .append(new NumericMask())
+      .append(new PredefinedTypeMask())
+      .append(new DefaultMask());
 
     try {
       const maskFactory: MaskFactory = maskFactoryHandler.handle(mask);

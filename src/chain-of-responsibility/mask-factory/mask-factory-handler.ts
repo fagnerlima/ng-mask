@@ -5,12 +5,14 @@ export abstract class MaskFactoryHandler {
 
   private nextHandler: MaskFactoryHandler;
 
-  public append(handler: MaskFactoryHandler) {
+  public append(handler: MaskFactoryHandler): MaskFactoryHandler {
     if (this.nextHandler) {
       this.nextHandler.append(handler);
     } else {
       this.nextHandler = handler;
     }
+
+    return this;
   }
 
   public handle(mask: string): MaskFactory {

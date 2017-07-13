@@ -1,151 +1,90 @@
-# NgMask
+# Ng Mask
+[![Build Status](https://travis-ci.org/fagnerlima/ng-mask.svg?branch=master)](https://travis-ci.org/fagnerlima/ng-mask)
+[![codecov](https://codecov.io/gh/fagnerlima/ng-mask/branch/master/graph/badge.svg)](https://codecov.io/gh/fagnerlima/ng-mask)
+[![npm version](https://badge.fury.io/js/@fagnerlima/ng-mask.svg)](http://badge.fury.io/js/@fagnerlima/ng-mask)
+[![devDependency Status](https://david-dm.org/fagnerlima/ng-mask/dev-status.svg)](https://david-dm.org/fagnerlima/ng-mask?type=dev)
+[![GitHub issues](https://img.shields.io/github/issues/fagnerlima/ng-mask.svg)](https://github.com/fagnerlima/ng-mask/issues)
+[![GitHub stars](https://img.shields.io/github/stars/fagnerlima/ng-mask.svg)](https://github.com/fagnerlima/ng-mask/stargazers)
+[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/fagnerlima/ng-mask/master/LICENSE)
 
-[![](https://img.shields.io/badge/npm-v2.2.1-brightgreen.svg)](https://www.npmjs.com/package/@fagnerlima/ng-mask)
+## Demo
+https://fagnerlima.github.io/ng-mask/
 
-NgMask is a [jQueryMaskPlugin](https://github.com/igorescobar/jQuery-Mask-Plugin) Adapter for Angular.
+## Table of contents
 
-## Dependencies
+- [About](#about)
+- [Installation](#installation)
+- [Documentation](#documentation)
+- [Development](#development)
+- [License](#license)
 
-- [@angular/core](https://www.npmjs.com/package/@angular/core): 2.4.10 or higher;
-- [@angular/forms](https://www.npmjs.com/package/@angular/forms): 2.4.10 or higher;
-- [jQuery](https://www.npmjs.com/package/jquery): 3.2.1 or higher;
-- [jQueryMaskPlugin](https://www.npmjs.com/package/jquery-mask-plugin): 1.14.11 or higher.
+## About
 
-## Usage
+A jQueryMaskPlugin Adapter for Angular.
 
-1. Install ng-mask using npm:
+## Installation
 
+Install through npm:
 ```
-npm install @fagnerlima/ng-mask
+npm install --save @fagnerlima/ng-mask
 ```
 
-2. Import NgMaskModule into Module class:
+Then include in your apps module:
 
 ```typescript
-// ...
+import { Component, NgModule } from '@angular/core';
 import { NgMaskModule } from '@fagnerlima/ng-mask';
 
 @NgModule({
   imports: [
-    // ...
-    NgMaskModule
-  ],
-  // ...
+    NgMaskModule.forRoot()
+  ]
 })
-export class AppModule { }
+export class MyModule {}
 ```
 
-3. Insert the directive in form inputs with ngControl (ex. ngModel or formControlName):
-
+Finally use in one of your apps components:
 ```typescript
 import { Component } from '@angular/core';
 
-import { Mask } from '@fagnerlima/ng-mask';
-
 @Component({
-  selector: 'app-root',
-  template: `
-    <h1>NgMask</h1>
-
-    <input type="text" [(ngModel)]="money" [mask]="maskMoney" />
-  `
+  template: '<hello-world></hello-world>'
 })
-export class AppComponent {
-
-  // Masks
-  readonly maskCep: string = 'brCep';
-  readonly maskCoordinateLat: string = 'coordinateLat';
-  readonly maskCoordinateLong: string = 'coordinateLong';
-  readonly maskCpf: Mask = new Mask('000.000.000-00');
-  readonly maskDecimal: string = 'decimal(10,2)';
-  readonly maskInteger: string = 'integer(6)';
-  readonly maskMoney: string = '#0.00?reverse=true';
-  readonly maskPhone: string = '(00) 00000-0000';
-
-  // Controls
-  money: string;
-}
+export class MyComponent {}
 ```
 
-## Mask Types
+You may also find it useful to view the [demo source](https://github.com/fagnerlima/ng-mask/blob/master/demo/demo.component.ts).
 
-### Mask Object
-
-Instance of Mask class.
-
-```typescript
-import { Mask } from '@fagnerlima/ng-mask';
-
-const dateMask: Mask = new Mask('00/00/0000');
-const percentMask: Mask = new Mask('##0,00%', { reverse: true })
+### Usage without a module bundler
+```
+<script src="node_modules/@fagnerlima/ng-mask/bundles/@fagnerlima/ng-mask.umd.js"></script>
+<script>
+    // everything is exported ng-mask namespace
+</script>
 ```
 
-### Default Mask
+## Documentation
+All documentation is auto-generated from the source via [compodoc](https://compodoc.github.io/compodoc/) and can be viewed here:
+https://fagnerlima.github.io/ng-mask/docs/
 
-String that represents pattern attribute of Mask class, using default jokers of jQueryMaskPlugin, without extra options.
+## Development
 
-```typescript
-const dateMask: string = '00/00/0000';
+### Prepare your environment
+* Install [Node.js](http://nodejs.org/) and NPM
+* Install local dev dependencies: `npm install` while current directory is this repo
+
+### Development server
+Run `npm start` to start a development server on port 8000 with auto reload + tests.
+
+### Testing
+Run `npm test` to run tests once or `npm run test:watch` to continually run tests.
+
+### Release
+* Bump the version in package.json (once the module hits 1.0 this will become automatic)
+```bash
+npm run release
 ```
 
-| Patterns | jQueryMaskPlugin's Default Configuration |
-|-|-|
-| 0 | { pattern: /\d/ } |
-| 9 | { pattern: /\d/, optional: true } |
-| # | { pattern: /\d/, recursive: true } |
-| A | { pattern: /[a-zA-Z0-9/ } |
-| S | { pattern: /[a-zA-Z]/ } |
+## License
 
-### QueryString Mask
-
-String in the QueryString format that contains the pattern and extra options of Mask class.
-
-```typescript
-const percentMask: string = '##0,00%?reverse=true&placeholder=000,00%';
-```
-
-| Supported Extra Options |
-|-|
-| clearIfNotMatch |
-| placeholder |
-| reverse |
-| selectOnFocus |
-
-### Predefined Type Mask
-
-String that contains a predefined type.
-
-```typescript
-const coordinateLatMask: string = 'coordinateLat';
-const coordinateLongMask: string = 'coordinateLong';
-```
-
-| Predefined Types | Pattern | Example |
-|-|-|-|
-| brCelular | new Mask('(00) 00009-0000') | (11) 95683-1298 |
-| brCep | new Mask('00000-000') | 58035-110 |
-| brCnpj | new Mask('00.000.000/0000-00') | 13.456.131/0000-12 |
-| brCpf | new Mask('000.000.000-00') | 034.465.789-13 |
-| brData | new Mask('00/00/0000') | 15/10/2016 |
-| brMoeda | new Mask('#.##0,00', { reverse: true }) | 2.199,99 |
-| brTelefone | new Mask('(00) 0000-0000') | (83) 3638-8973 |
-| usPhone | new Mask('(000) 000-0000') | (581) 555-5895 |
-| coordinateLat | new Mask('000º00.0000\\'\~', { translation: { '\~': { pattern: /[N\|S]/ } } }) | 123º54.7894'N |
-| coordinateLong | new Mask('000º00.0000\\'\~', { translation: { '\~': { pattern: /[E\|W]/ } } }) | 354º79.6452'E |
-| date | new Mask('00/00/0000') | 01/31/2017 |
-| dateTime | new Mask('00/00/0000 00:00:00') | 05/18/2017 08:30:00 |
-| time | new Mask('00:00:00') | 19:15:00 |
-
-### Numeric Mask
-
-String that contains a numeric type with your **precision** (and **scale** for decimal type), similar to many databases.
-
-```typescript
-const integerMask: string = 'integer(6)';
-const decimalMask: string = 'decimal(10,2)';
-```
-
-| Numeric Types | Examples |
-|-|-|
-| integer | integer(6) |
-| decimal | decimal(5,2) |
+MIT

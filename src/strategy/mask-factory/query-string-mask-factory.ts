@@ -17,11 +17,11 @@ export class QueryStringMaskFactory extends MaskFactory {
     return new Mask(this.pattern, this.options);
   }
 
-  private initPattern() {
+  private initPattern(): void {
     this.pattern = this.mask.split('?')[0];
   }
 
-  private buildOptions() {
+  private buildOptions(): void {
     const queryString: string = this.mask.split('?')[1];
     const options: string[] = queryString.split('&');
 
@@ -38,19 +38,19 @@ export class QueryStringMaskFactory extends MaskFactory {
     }
   }
 
-  private setOptionPlaceholder(option: string) {
+  private setOptionPlaceholder(option: string): void {
     this.options.placeholder = option.split('=')[1];
   }
 
-  private setOptionReverse(option: string) {
+  private setOptionReverse(option: string): void {
     this.options.reverse = 'true' === option.split('=')[1] ? true : false;
   }
 
-  private setOptionClearIfNotMatch(option: string) {
+  private setOptionClearIfNotMatch(option: string): void {
     this.options.clearIfNotMatch = 'true' === option.split('=')[1] ? true : false;
   }
 
-  private setOptionSelectOnFocus(option: string) {
+  private setOptionSelectOnFocus(option: string): void {
     this.options.selectOnFocus = 'true' === option.split('=')[1] ? true : false;
   }
 }

@@ -1,36 +1,42 @@
-import { Directive, Input, ElementRef, AfterContentInit, HostListener } from '@angular/core';
-import { NgControl } from '@angular/forms';
+import { Directive, Input, ElementRef, AfterContentInit, HostListener, forwardRef } from '@angular/core';
+import { NgControl, ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
-import $ from 'jquery';
 import { Mask } from './mask';
 import { MaskService } from './mask.service';
 
+import $ = require('jquery');
 require('jquery-mask-plugin');
 
 @Directive({
-  selector: '[mask]',
-  providers: [MaskService]
+  selector: '[flMask]',
+  providers: [
+    MaskService,
+    // {
+    //   provide: NG_VALUE_ACCESSOR,
+    //   useExisting: forwardRef(() => MaskDirective),
+    //   multi: true
+    // }
+  ]
 })
-export class MaskDirective implements AfterContentInit {
+export class MaskDirective implements AfterContentInit, ControlValueAccessor {
 
-  @Input() mask: Mask|string;
+  @Input() public flMask: Mask | string;
 
-  constructor(
+  public constructor(
     private elementRef: ElementRef,
-    private ngControl: NgControl,
     private maskService: MaskService
   ) { }
 
-  ngAfterContentInit() {
-    if (!this.mask) {
+  public ngAfterContentInit(): void {
+    if (!this.flMask) {
 
       return;
     }
 
-    if (this.mask instanceof Mask && this.mask.pattern) {
-      this.setInputMask(this.mask);
-    } else if (typeof this.mask === 'string' && this.mask.length > 0) {
-      const mask: Mask = this.maskService.createMask(this.mask);
+    if (this.flMask instanceof Mask && this.flMask.pattern) {
+      this.setInputMask(this.flMask);
+    } else if (typeof this.flMask === 'string' && this.flMask.length > 0) {
+      const mask: Mask = this.maskService.createMask(this.flMask);
 
       if (mask) {
         this.setInputMask(mask);
@@ -38,11 +44,27 @@ export class MaskDirective implements AfterContentInit {
     }
   }
 
-  private setInputMask(mask: Mask) {
-    $(this.elementRef.nativeElement).mask(mask.pattern, mask.options);
+  @HostListener('blur', ['$event']) public onBlur(): void {
+    // this.ngControl.control.setValue(this.elementRef.nativeElement.value);
   }
 
-  @HostListener('blur') onBlur() {
-    this.ngControl.control.setValue(this.elementRef.nativeElement.value);
+  public writeValue(value: string): void {
+    if (!value) {
+      return;
+    }
+
+    // $(this.elementRef.nativeElement).mask(mask.pattern, mask.options);
+    console.log(value);
+  }
+
+  public registerOnChange(fn: any): void {
+    this._onChange = fn;
+    return;
+  }
+
+  private _onChange = (_: any) => { };
+
+  private setInputMask(mask: Mask): void {
+    $(this.elementRef.nativeElement).mask(mask.pattern, mask.options);
   }
 }
