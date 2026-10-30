@@ -57,9 +57,11 @@ class TemplateHostComponent {
 
 @Component({
   imports: [MaskDirective],
-  template: `<input mask="brCep" placeholder="CEP" />`,
+  template: `<input mask="brCep" placeholder="CEP" [maskPlaceholder]="placeholder()" />`,
 })
-class StandaloneHostComponent {}
+class StandaloneHostComponent {
+  readonly placeholder = signal<string | undefined>(undefined);
+}
 
 describe('MaskDirective', () => {
   describe('with reactive forms', () => {
@@ -239,6 +241,31 @@ describe('MaskDirective', () => {
       expect([input.selectionStart, input.selectionEnd]).toEqual([0, 14]);
     });
 
+    it('removes the placeholder when maskPlaceholder is unset', async () => {
+      await setUp();
+      host.placeholder.set('000.000.000-00');
+      await fixture.whenStable();
+      host.placeholder.set(undefined);
+      await fixture.whenStable();
+
+      expect(input.hasAttribute('placeholder')).toBe(false);
+    });
+
+    it('does not mark a pristine control dirty when the mask changes', async () => {
+      await setUp('12345678909');
+      const changes: unknown[] = [];
+      host.control.valueChanges.subscribe((value) => changes.push(value));
+
+      host.mask.set('00.000.000/0000-00');
+      host.output.set('raw');
+      await fixture.whenStable();
+
+      expect(input.value).toBe('12.345.678/909');
+      expect(host.control.value).toBe('12345678909');
+      expect(host.control.pristine).toBe(true);
+      expect(changes).toEqual([]);
+    });
+
     describe('with brMoeda', () => {
       beforeEach(async () => {
         await setUp();
@@ -380,6 +407,22 @@ describe('MaskDirective', () => {
       type(input, '01310930');
 
       expect(input.value).toBe('01310-930');
+      expect(input.getAttribute('placeholder')).toBe('CEP');
+    });
+
+    it('restores its own placeholder after maskPlaceholder is unset', async () => {
+      const fixture = TestBed.createComponent(StandaloneHostComponent);
+      await fixture.whenStable();
+      const input: HTMLInputElement = fixture.nativeElement.querySelector('input');
+
+      fixture.componentInstance.placeholder.set('00000-000');
+      await fixture.whenStable();
+
+      expect(input.getAttribute('placeholder')).toBe('00000-000');
+
+      fixture.componentInstance.placeholder.set(undefined);
+      await fixture.whenStable();
+
       expect(input.getAttribute('placeholder')).toBe('CEP');
     });
   });

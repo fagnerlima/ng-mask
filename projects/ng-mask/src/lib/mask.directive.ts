@@ -59,7 +59,7 @@ export class MaskDirective implements ControlValueAccessor {
   readonly maskClearIfNotMatch = input(false, { transform: booleanAttribute });
   /** Selects the whole value when the field gets focus. */
   readonly maskSelectOnFocus = input(false, { transform: booleanAttribute });
-  /** Sets the field's `placeholder` attribute. */
+  /** Sets the field's `placeholder` attribute; the original one comes back when unset. */
   readonly maskPlaceholder = input<string>();
 
   private readonly element: TextField = inject<ElementRef<TextField>>(ElementRef).nativeElement;
@@ -70,6 +70,10 @@ export class MaskDirective implements ControlValueAccessor {
   private onTouched: () => void = () => undefined;
   private lastOutput = '';
   private composing = false;
+  /** Whether the current value was edited by the user (true) or written from the model (false). */
+  private userEdited = false;
+  /** The element's own placeholder, saved while `maskPlaceholder` overrides it. */
+  private placeholderBeforeMask: string | null | undefined;
 
   constructor() {
     effect(() => {
@@ -80,10 +84,7 @@ export class MaskDirective implements ControlValueAccessor {
 
     effect(() => {
       const placeholder = this.maskPlaceholder();
-
-      if (placeholder !== undefined) {
-        this.renderer.setAttribute(this.element, 'placeholder', placeholder);
-      }
+      untracked(() => this.applyPlaceholder(placeholder));
     });
   }
 
@@ -92,10 +93,11 @@ export class MaskDirective implements ControlValueAccessor {
     const modelValue = typeof value === 'number' || value == null ? value : String(value);
     const result = config
       ? formatValue(modelValue, config)
-      : this.format(modelValue == null ? '' : String(modelValue));
+      : this.passThrough(modelValue == null ? '' : String(modelValue));
 
     this.renderer.setProperty(this.element, 'value', result.masked);
     this.lastOutput = this.toOutput(result);
+    this.userEdited = false;
   }
 
   registerOnChange(fn: (value: string) => void): void {
@@ -118,8 +120,10 @@ export class MaskDirective implements ControlValueAccessor {
     const config = this.config();
     const { value, selectionStart } = this.element;
 
+    this.userEdited = true;
+
     if (!config) {
-      this.emit({ masked: value, raw: value, complete: true });
+      this.emit(this.passThrough(value));
       return;
     }
 
@@ -141,6 +145,7 @@ export class MaskDirective implements ControlValueAccessor {
 
     if (this.maskClearIfNotMatch() && value !== '' && !this.format(value).complete) {
       this.element.value = '';
+      this.userEdited = true;
       this.emit(this.format(''));
     }
 
@@ -163,7 +168,11 @@ export class MaskDirective implements ControlValueAccessor {
     this.onInput(new Event('input'));
   }
 
-  /** Re-applies the mask when the mask or the output mode changes after the value was set. */
+  /**
+   * Re-applies the mask when the mask or the output mode changes. The model is only updated when
+   * it holds a user edit; a value written from code is just re-displayed, so changing the mask
+   * never marks a pristine control dirty or emits `valueChanges`.
+   */
   private reformat(config: MaskConfig | null): void {
     const { value } = this.element;
 
@@ -173,13 +182,41 @@ export class MaskDirective implements ControlValueAccessor {
 
     const result = applyMask(value, config);
     this.element.value = result.masked;
-    this.emit(result);
+
+    if (this.userEdited) {
+      this.emit(result);
+    }
   }
 
   private format(value: string): MaskResult {
     const config = this.config();
 
-    return config ? applyMask(value, config) : { masked: value, raw: value, complete: true };
+    return config ? applyMask(value, config) : this.passThrough(value);
+  }
+
+  private passThrough(value: string): MaskResult {
+    return { masked: value, raw: value, complete: true };
+  }
+
+  private applyPlaceholder(placeholder: string | undefined): void {
+    if (placeholder !== undefined) {
+      if (this.placeholderBeforeMask === undefined) {
+        this.placeholderBeforeMask = this.element.getAttribute('placeholder');
+      }
+      this.renderer.setAttribute(this.element, 'placeholder', placeholder);
+      return;
+    }
+
+    if (this.placeholderBeforeMask === undefined) {
+      return;
+    }
+
+    if (this.placeholderBeforeMask === null) {
+      this.renderer.removeAttribute(this.element, 'placeholder');
+    } else {
+      this.renderer.setAttribute(this.element, 'placeholder', this.placeholderBeforeMask);
+    }
+    this.placeholderBeforeMask = undefined;
   }
 
   private toOutput(result: MaskResult): string {
