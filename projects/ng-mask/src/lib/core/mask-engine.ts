@@ -37,9 +37,12 @@ export interface MaskConfig {
    * - only digits are kept, extra leading zeros are removed and the value is padded to
    *   `scale + 1` digits, so `5` shows as `0,05` with `#.##0,00`;
    * - `raw` is a dot-decimal string with exactly `scale` decimals (`1234.56`);
-   * - {@link formatValue} formats numbers and dot-decimal strings with `toFixed(scale)`.
+   * - {@link formatValue} reads numbers and dot-decimal strings as amounts, rounded half up to
+   *   `scale` decimals.
    *
-   * Use it with a reverse pattern. Negative values are not supported: the sign is dropped.
+   * An integer from 1 to 64. Use it with a reverse pattern. Negative values are not supported:
+   * the sign is dropped. Values longer than a fixed-length pattern lose their leftmost digits,
+   * typed or written from code.
    */
   readonly scale?: number;
 }
@@ -100,9 +103,11 @@ interface PatternRun {
 type LiteralMode = 'formatted' | 'consume' | 'insert';
 
 const DECIMAL_STRING = /^-?\d+(?:\.\d+)?$/;
+const MAX_SCALE = 64;
 
 /** Applies a mask to text, as typed or pasted by the user. */
 export function applyMask(value: string, config: MaskConfig): MaskResult {
+  assertValidScale(config);
   const input = prepareInput(value, value.length, config);
 
   return toResult(selectRun(input.value, config, false), config);
@@ -118,6 +123,8 @@ export function formatValue(
   value: string | number | null | undefined,
   config: MaskConfig,
 ): MaskResult {
+  assertValidScale(config);
+
   if (value === null || value === undefined) {
     return applyMask('', config);
   }
@@ -142,6 +149,7 @@ export function applyMaskWithCaret(
   config: MaskConfig,
   deleteBackward = false,
 ): MaskEditResult {
+  assertValidScale(config);
   const input = prepareInput(value, Math.max(0, Math.min(caret, value.length)), config);
   const run = selectRun(input.value, config, deleteBackward);
   const mappedCaret = config.reverse
@@ -170,15 +178,39 @@ function prepareInput(
   return { value: digits, caret: Math.max(0, digits.length - digitsAfterCaret) };
 }
 
+/**
+ * Reads numbers and dot-decimal strings as an amount scaled to integer digits, exactly: the text
+ * is split at the dot and the fraction padded or rounded half up (`'1234.565'` → `123457` with
+ * scale 2). Numbers that `String()` writes in exponent notation (`1e21`) and non-finite numbers
+ * give an empty field. Returns `null` for other strings, which are read as typed text.
+ */
 function numberToScaledDigits(value: string | number, scale: number): string | null {
-  const isDecimalString = typeof value === 'string' && DECIMAL_STRING.test(value.trim());
-  const number = typeof value === 'number' || isDecimalString ? Number(value) : Number.NaN;
+  if (typeof value === 'number') {
+    const text = String(value);
 
-  if (!Number.isFinite(number)) {
-    return null;
+    return Number.isFinite(value) && !/e/i.test(text) ? decimalToScaledDigits(text, scale) : '';
   }
 
-  return scaledDigits(Math.abs(number).toFixed(scale).replace('.', ''), scale, true);
+  const text = value.trim();
+
+  return DECIMAL_STRING.test(text) ? decimalToScaledDigits(text, scale) : null;
+}
+
+function decimalToScaledDigits(text: string, scale: number): string {
+  const [integer, fraction = ''] = text.replace('-', '').split('.');
+  const kept = fraction.slice(0, scale).padEnd(scale, '0');
+  const roundUp = Number(fraction[scale] ?? '0') >= 5;
+  const digits = BigInt(`${integer}${kept}`) + (roundUp ? 1n : 0n);
+
+  return scaledDigits(digits.toString(), scale, true);
+}
+
+function assertValidScale({ scale }: MaskConfig): void {
+  if (scale !== undefined && !(Number.isInteger(scale) && scale >= 1 && scale <= MAX_SCALE)) {
+    throw new Error(
+      `[ng-mask] Invalid mask: scale must be an integer from 1 to ${MAX_SCALE}, got ${scale}.`,
+    );
+  }
 }
 
 /**
@@ -221,7 +253,7 @@ function toDecimalString(digits: string, scale: number): string {
   const padded = digits.padStart(scale + 1, '0');
   const integer = padded.slice(0, padded.length - scale).replace(/^0+(?=\d)/, '');
 
-  return scale === 0 ? integer : `${integer}.${padded.slice(padded.length - scale)}`;
+  return `${integer}.${padded.slice(padded.length - scale)}`;
 }
 
 function selectRun(value: string, config: MaskConfig, deleteBackward: boolean): PatternRun {

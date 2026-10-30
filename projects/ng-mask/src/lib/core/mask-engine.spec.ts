@@ -160,11 +160,22 @@ describe('applyMask', () => {
       expect(applyMaskWithCaret('0,0', 3, money, true)).toMatchObject({ masked: '', caret: 0 });
     });
 
-    it('supports a scale of zero', () => {
-      expect(applyMask('0012', { pattern: '#.##0', reverse: true, scale: 0 })).toMatchObject({
-        masked: '12',
-        raw: '12',
-      });
+    it.each([0, -1, 1.5, 65, Number.NaN, Number.POSITIVE_INFINITY])(
+      'rejects the scale %s',
+      (scale) => {
+        const config: MaskConfig = { pattern: '#.##0,00', reverse: true, scale };
+        const error = /\[ng-mask\] Invalid mask: scale must be an integer from 1 to 64/;
+
+        expect(() => applyMask('1', config)).toThrowError(error);
+        expect(() => applyMaskWithCaret('1', 1, config)).toThrowError(error);
+        expect(() => formatValue(1, config)).toThrowError(error);
+      },
+    );
+
+    it('accepts the largest scale', () => {
+      expect(applyMask('5', { pattern: '#.' + '0'.repeat(64), reverse: true, scale: 64 }).raw).toBe(
+        `0.${'0'.repeat(63)}5`,
+      );
     });
   });
 
@@ -261,12 +272,32 @@ describe('formatValue', () => {
     [0.05, '0,05', '0.05'],
     [0, '0,00', '0.00'],
     [1234.567, '1.234,57', '1234.57'],
+    [1.005, '1,01', '1.01'],
+    ['1234.565', '1.234,57', '1234.57'],
+    ['1234.564', '1.234,56', '1234.56'],
+    ['0.995', '1,00', '1.00'],
+    ['99999999999999999.99', '99.999.999.999.999.999,99', '99999999999999999.99'],
+    [' 42 ', '42,00', '42.00'],
   ])('formats the number %j as %s with raw %s', (value, expected, raw) => {
     expect(formatValue(value, money)).toMatchObject({ masked: expected, raw });
   });
 
   it('reads already formatted text as typed text', () => {
     expect(formatValue('1.234,56', money).masked).toBe('1.234,56');
+  });
+
+  it.each([1e21, 1e-7, Number.NaN, Number.POSITIVE_INFINITY])(
+    'formats the number %s, which has no plain decimal form, as empty',
+    (value) => {
+      expect(formatValue(value, money)).toEqual({ masked: '', raw: '', complete: false });
+    },
+  );
+
+  it('keeps the rightmost digits of an amount too long for a fixed-length mask, like typing', () => {
+    const decimal: MaskConfig = { pattern: '000.00', reverse: true, scale: 2 };
+
+    expect(formatValue(123456.78, decimal).masked).toBe('456.78');
+    expect(applyMask('12345678', decimal).masked).toBe('456.78');
   });
 
   it('drops the sign of negative numbers (not supported)', () => {
