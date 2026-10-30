@@ -1,0 +1,43 @@
+{
+  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+  "version": 1,
+  "cli": {
+    "packageManager": "npm"
+  },
+  "newProjectRoot": "projects",
+  "projects": {
+    "ng-mask": {
+      "projectType": "library",
+      "root": "projects/ng-mask",
+      "sourceRoot": "projects/ng-mask/src",
+      "prefix": "ng",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:ng-packagr",
+          "configurations": {
+            "production": {
+              "tsConfig": "projects/ng-mask/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "tsConfig": "projects/ng-mask/tsconfig.lib.json"
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "test": {
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "tsConfig": "projects/ng-mask/tsconfig.spec.json"
+          }
+        },
+        "lint": {
+          "builder": "@angular-eslint/builder:lint",
+          "options": {
+            "lintFilePatterns": ["projects/ng-mask/**/*.ts", "projects/ng-mask/**/*.html"],
+            "eslintConfig": "projects/ng-mask/eslint.config.js"
+          }
+        }
+      }
+    }
+  }
+}

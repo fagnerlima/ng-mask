@@ -1,61 +1,41 @@
 {
-  "name": "@fagnerlima/ng-mask",
-  "version": "2.2.1",
-  "description": "jQueryMaskPlugin Adapter for Angular",
+  "name": "ng-mask-workspace",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Development workspace for @fagnerlima/ng-mask (library + demo).",
   "scripts": {
-    "build": "./build.sh",
-    "build:watch": "node ./watch.js",
-    "lint": "tslint --type-check --project tsconfig.json src/**/*.ts",
-    "test": "tsc && karma start"
+    "ng": "ng",
+    "lint": "ng lint",
+    "test": "ng test ng-mask --watch=false",
+    "build": "npm run build:lib",
+    "build:lib": "ng build ng-mask && node scripts/finalize-package.mjs",
+    "pack:check": "node scripts/check-package.mjs"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/fagnerlima/ng-mask.git"
+  "packageManager": "npm@12.1.0",
+  "engines": {
+    "node": ">=24"
   },
-  "author": {
-    "name": "Fagner Lima",
-    "email": "contato@fagnerlima.pro.br",
-    "url": "http://fagnerlima.pro.br"
-  },
-  "keywords": [
-    "angular",
-    "jquery",
-    "mask"
-  ],
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/fagnerlima/ng-mask/issues"
+  "dependencies": {
+    "@angular/common": "^22.2.0",
+    "@angular/compiler": "^22.2.0",
+    "@angular/core": "^22.2.0",
+    "@angular/forms": "^22.2.0",
+    "@angular/platform-browser": "^22.2.0",
+    "rxjs": "~7.8.0",
+    "tslib": "^2.3.0"
   },
   "devDependencies": {
-    "@angular/cli": "^1.1.1",
-    "@angular/common": "^4.1.3",
-    "@angular/compiler": "^4.1.3",
-    "@angular/compiler-cli": "^4.1.3",
-    "@angular/core": "^4.1.3",
-    "@angular/platform-browser": "^4.1.3",
-    "@angular/platform-browser-dynamic": "^4.1.3",
-    "@types/jasmine": "2.5.38",
-    "@types/node": "^6.0.70",
-    "codelyzer": "~2.0.0",
-    "core-js": "^2.4.1",
-    "jasmine-core": "~2.5.2",
-    "jasmine-spec-reporter": "~3.2.0",
-    "karma": "~1.4.1",
-    "karma-chrome-launcher": "~2.0.0",
-    "karma-cli": "~1.0.1",
-    "karma-coverage-istanbul-reporter": "^0.2.0",
-    "karma-jasmine": "~1.1.0",
-    "karma-jasmine-html-reporter": "^0.2.2",
-    "node-watch": "^0.5.2",
-    "protractor": "~5.1.0",
-    "rollup": "^0.41.6",
-    "rxjs": "^5.1.0",
-    "ts-node": "~2.0.0",
-    "tslint": "~4.5.0",
-    "typescript": "~2.2.0",
-    "zone.js": "^0.8.9"
-  },
-  "engines": {
-    "node": ">=6.0.0"
+    "@angular/build": "^22.2.5",
+    "@angular/cli": "^22.2.5",
+    "@angular/compiler-cli": "^22.2.0",
+    "@eslint/js": "^10.0.1",
+    "angular-eslint": "22.6.0",
+    "eslint": "^10.12.0",
+    "jsdom": "^30.0.0",
+    "ng-packagr": "^22.2.0",
+    "prettier": "^3.8.1",
+    "typescript": "~6.0.2",
+    "typescript-eslint": "8.71.0",
+    "vitest": "^5.0.0"
   }
 }
