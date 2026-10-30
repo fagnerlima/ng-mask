@@ -72,6 +72,8 @@ export class MaskDirective implements ControlValueAccessor {
   private onTouched: () => void = () => undefined;
   private lastOutput = '';
   private composing = false;
+  /** Value length when an IME composition started, to tell whether its commit deleted text. */
+  private lengthBeforeComposition = 0;
   /** Whether the current value was edited by the user (true) or written from the model (false). */
   private userEdited = false;
   /** The element's own placeholder, saved while `maskPlaceholder` overrides it. */
@@ -119,6 +121,15 @@ export class MaskDirective implements ControlValueAccessor {
       return;
     }
 
+    const inputType = (event as InputEvent).inputType ?? '';
+    this.applyEdit(inputType === 'deleteContentBackward', inputType.startsWith('delete'));
+  }
+
+  /**
+   * @param deleteBackward Backspace: keeps the caret on the left of restored separators.
+   * @param isDeletion any edit that removed text (Backspace, Delete, cut, word deletion).
+   */
+  private applyEdit(deleteBackward: boolean, isDeletion: boolean): void {
     const config = this.config();
     const { value, selectionStart } = this.element;
 
@@ -129,12 +140,12 @@ export class MaskDirective implements ControlValueAccessor {
       return;
     }
 
-    const deleteBackward = (event as InputEvent).inputType === 'deleteContentBackward';
     const result = applyMaskWithCaret(
       value,
       selectionStart ?? value.length,
       config,
       deleteBackward,
+      isDeletion,
     );
 
     this.element.value = result.masked;
@@ -162,12 +173,13 @@ export class MaskDirective implements ControlValueAccessor {
 
   protected onCompositionStart(): void {
     this.composing = true;
+    this.lengthBeforeComposition = this.element.value.length;
   }
 
   /** IME input is masked once the composed text is committed. */
   protected onCompositionEnd(): void {
     this.composing = false;
-    this.onInput(new Event('input'));
+    this.applyEdit(false, this.element.value.length < this.lengthBeforeComposition);
   }
 
   /**

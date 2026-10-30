@@ -304,8 +304,6 @@ Use `tel-national` rather than `tel`: autofilled `+55 …` numbers do not fit th
 - **Pasting more characters than the mask holds** truncates the value: fixed-length masks keep
   the first characters (reverse ones the last) and drop the rest.
 - **Negative numbers** are not supported by money and decimal masks.
-- With a pattern that starts with a digit literal such as `2000-00`, pressing **Delete** (not
-  Backspace) at the start of `22` brings the second `2` back. Backspace works as expected.
 
 ## Migrating from 2.x
 

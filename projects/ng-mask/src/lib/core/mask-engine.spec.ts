@@ -130,6 +130,15 @@ describe('applyMask', () => {
       expect(applyMaskWithCaret('2', 1, config, true)).toMatchObject({ masked: '', caret: 0 });
       expect(applyMaskWithCaret('22', 2, config, true)).toMatchObject({ masked: '22', caret: 2 });
     });
+
+    it('lets any deletion empty a field that starts with a digit literal (2000-00)', () => {
+      const config: MaskConfig = { pattern: '2000-00' };
+
+      // Delete at the start of "22", cut or word deletion: not Backspace, but still a deletion.
+      expect(applyMaskWithCaret('2', 0, config, false, true)).toMatchObject({ masked: '' });
+      // Without the flag, the leftover "2" is read as typed.
+      expect(applyMaskWithCaret('2', 0, config, false)).toMatchObject({ masked: '22' });
+    });
   });
 
   describe('fixed-point masks (scale)', () => {

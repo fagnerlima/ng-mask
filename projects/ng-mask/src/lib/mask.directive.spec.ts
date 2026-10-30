@@ -282,6 +282,48 @@ describe('MaskDirective', () => {
       expect(changes).toEqual([]);
     });
 
+    describe('with a pattern that starts with a digit literal (2000-00)', () => {
+      beforeEach(async () => {
+        await setUp();
+        host.mask.set('2000-00');
+        await fixture.whenStable();
+        type(input, '2');
+      });
+
+      it('reads a typed "2" as input', () => {
+        expect(input.value).toBe('22');
+      });
+
+      it.each([
+        'deleteContentBackward',
+        'deleteContentForward',
+        'deleteByCut',
+        'deleteWordBackward',
+      ])('empties the field when %s leaves only the literal', (inputType) => {
+        edit(input, '2', inputType === 'deleteContentBackward' ? 1 : 0, inputType);
+
+        expect(input.value).toBe('');
+        expect(host.control.value).toBe('');
+      });
+
+      it('empties the field when an IME commit shortens the value to the literal', () => {
+        input.dispatchEvent(new CompositionEvent('compositionstart'));
+        input.value = '2';
+        input.dispatchEvent(new CompositionEvent('compositionend'));
+
+        expect(input.value).toBe('');
+      });
+
+      it('reads a committed IME "2" in an empty field as input', () => {
+        edit(input, '', 0, 'deleteContentBackward');
+        input.dispatchEvent(new CompositionEvent('compositionstart'));
+        input.value = '2';
+        input.dispatchEvent(new CompositionEvent('compositionend'));
+
+        expect(input.value).toBe('22');
+      });
+    });
+
     describe('with brMoeda', () => {
       beforeEach(async () => {
         await setUp();

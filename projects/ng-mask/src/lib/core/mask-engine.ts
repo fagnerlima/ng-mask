@@ -142,16 +142,20 @@ export function formatValue(
  *
  * @param deleteBackward true when the edit was a backward deletion (Backspace). It decides on
  * which side of adjacent literals the caret lands, so repeated deletions never get stuck.
+ * @param isDeletion true when the edit removed text in any way (Backspace, Delete, cut, word
+ * deletion, an IME commit that shortened the value). A deletion never turns a leftover leading
+ * literal back into a typed character, so the field can be emptied.
  */
 export function applyMaskWithCaret(
   value: string,
   caret: number,
   config: MaskConfig,
   deleteBackward = false,
+  isDeletion = deleteBackward,
 ): MaskEditResult {
   assertValidScale(config);
   const input = prepareInput(value, Math.max(0, Math.min(caret, value.length)), config);
-  const run = selectRun(input.value, config, deleteBackward);
+  const run = selectRun(input.value, config, isDeletion);
   const mappedCaret = config.reverse
     ? mapCaretFromEnd(run, input.caret, deleteBackward)
     : mapCaretFromStart(run, input.caret, deleteBackward);
@@ -256,7 +260,7 @@ function toDecimalString(digits: string, scale: number): string {
   return `${integer}.${padded.slice(padded.length - scale)}`;
 }
 
-function selectRun(value: string, config: MaskConfig, deleteBackward: boolean): PatternRun {
+function selectRun(value: string, config: MaskConfig, isDeletion: boolean): PatternRun {
   const patterns = typeof config.pattern === 'string' ? [config.pattern] : config.pattern;
 
   if (patterns.length === 0) {
@@ -270,7 +274,7 @@ function selectRun(value: string, config: MaskConfig, deleteBackward: boolean): 
   for (const pattern of patterns) {
     const run = runPatternBestMode(
       (mode) => runPattern(value, pattern, translation, config.reverse ?? false, isCandidate, mode),
-      deleteBackward,
+      isDeletion,
     );
 
     if (run.overflow === 0) {
@@ -290,11 +294,11 @@ function selectRun(value: string, config: MaskConfig, deleteBackward: boolean): 
  * country code or a digit). The `formatted` reading wins unless it overflows or drops input; then
  * the `consume` reading may do better (a pasted "5551999998888"). When nothing at all was accepted,
  * the user typed a character equal to a leading literal ("2" in "2000-00"), so the `insert`
- * reading is used if it is clean, except on Backspace, which must be able to empty the field.
+ * reading is used if it is clean, except on deletions, which must be able to empty the field.
  */
 function runPatternBestMode(
   run: (mode: LiteralMode) => PatternRun,
-  deleteBackward: boolean,
+  isDeletion: boolean,
 ): PatternRun {
   let best = run('formatted');
 
@@ -303,7 +307,7 @@ function runPatternBestMode(
     best = compareRuns(consume, best) > 0 ? consume : best;
   }
 
-  if (best.acceptedCount === 0 && !deleteBackward) {
+  if (best.acceptedCount === 0 && !isDeletion) {
     const insert = run('insert');
     best = isClean(insert) && insert.acceptedCount > 0 ? insert : best;
   }
