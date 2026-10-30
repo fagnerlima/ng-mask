@@ -84,8 +84,20 @@ interface PatternRun {
   readonly overflow: number;
   /** Characters accepted before the first dropped one: how far the pattern follows the input. */
   readonly acceptedBeforeOverflow: number;
+  readonly acceptedCount: number;
+  /** Input characters neither accepted by a token nor matched by a literal. */
+  readonly dropped: number;
   readonly complete: boolean;
 }
+
+/**
+ * How literals of the pattern treat an equal input character:
+ * - `formatted`: consumed while the input is formatted at that point; once a literal of a run had
+ *   to be inserted, the following ones are inserted too ("5" in "+55 (00)" is a digit);
+ * - `consume`: always consumed ("5551…" keeps "55" as the country code);
+ * - `insert`: never consumed ("2" in "2000-00" is a digit).
+ */
+type LiteralMode = 'formatted' | 'consume' | 'insert';
 
 const DECIMAL_STRING = /^-?\d+(?:\.\d+)?$/;
 
@@ -93,7 +105,7 @@ const DECIMAL_STRING = /^-?\d+(?:\.\d+)?$/;
 export function applyMask(value: string, config: MaskConfig): MaskResult {
   const input = prepareInput(value, value.length, config);
 
-  return toResult(selectRun(input.value, config), config);
+  return toResult(selectRun(input.value, config, false), config);
 }
 
 /**
@@ -114,7 +126,7 @@ export function formatValue(
 
   return digits === null
     ? applyMask(String(value), config)
-    : toResult(selectRun(digits, config), config);
+    : toResult(selectRun(digits, config, false), config);
 }
 
 /**
@@ -131,7 +143,7 @@ export function applyMaskWithCaret(
   deleteBackward = false,
 ): MaskEditResult {
   const input = prepareInput(value, Math.max(0, Math.min(caret, value.length)), config);
-  const run = selectRun(input.value, config);
+  const run = selectRun(input.value, config, deleteBackward);
   const mappedCaret = config.reverse
     ? mapCaretFromEnd(run, input.caret, deleteBackward)
     : mapCaretFromStart(run, input.caret, deleteBackward);
@@ -212,7 +224,7 @@ function toDecimalString(digits: string, scale: number): string {
   return scale === 0 ? integer : `${integer}.${padded.slice(padded.length - scale)}`;
 }
 
-function selectRun(value: string, config: MaskConfig): PatternRun {
+function selectRun(value: string, config: MaskConfig, deleteBackward: boolean): PatternRun {
   const patterns = typeof config.pattern === 'string' ? [config.pattern] : config.pattern;
 
   if (patterns.length === 0) {
@@ -224,7 +236,10 @@ function selectRun(value: string, config: MaskConfig): PatternRun {
   let best: PatternRun | undefined;
 
   for (const pattern of patterns) {
-    const run = runPattern(value, pattern, translation, config.reverse ?? false, isCandidate);
+    const run = runPatternBestMode(
+      (mode) => runPattern(value, pattern, translation, config.reverse ?? false, isCandidate, mode),
+      deleteBackward,
+    );
 
     if (run.overflow === 0) {
       return run;
@@ -236,6 +251,45 @@ function selectRun(value: string, config: MaskConfig): PatternRun {
   }
 
   return best as PatternRun;
+}
+
+/**
+ * Literals equal to input characters are ambiguous ("5" in "+55 (00) 00000-0000" may be the
+ * country code or a digit). The `formatted` reading wins unless it overflows or drops input; then
+ * the `consume` reading may do better (a pasted "5551999998888"). When nothing at all was accepted,
+ * the user typed a character equal to a leading literal ("2" in "2000-00"), so the `insert`
+ * reading is used if it is clean, except on Backspace, which must be able to empty the field.
+ */
+function runPatternBestMode(
+  run: (mode: LiteralMode) => PatternRun,
+  deleteBackward: boolean,
+): PatternRun {
+  let best = run('formatted');
+
+  if (!isClean(best)) {
+    const consume = run('consume');
+    best = compareRuns(consume, best) > 0 ? consume : best;
+  }
+
+  if (best.acceptedCount === 0 && !deleteBackward) {
+    const insert = run('insert');
+    best = isClean(insert) && insert.acceptedCount > 0 ? insert : best;
+  }
+
+  return best;
+}
+
+function isClean(run: PatternRun): boolean {
+  return run.overflow === 0 && run.dropped === 0;
+}
+
+/** Positive when `a` is better: no overflow, then no dropped input, then more accepted. */
+function compareRuns(a: PatternRun, b: PatternRun): number {
+  return (
+    Number(a.overflow === 0) - Number(b.overflow === 0) ||
+    Number(a.dropped === 0) - Number(b.dropped === 0) ||
+    a.acceptedCount - b.acceptedCount
+  );
 }
 
 /** Matches characters that some token of the candidate patterns could accept. */
@@ -276,6 +330,7 @@ function runPattern(
   translation: MaskTranslation,
   reverse: boolean,
   isCandidate: (char: string) => boolean,
+  literalMode: LiteralMode,
 ): PatternRun {
   const step = reverse ? -1 : 1;
   const terminal = reverse ? 0 : pattern.length - 1;
@@ -288,8 +343,10 @@ function runPattern(
   let acceptedCount = 0;
   let overflow = 0;
   let acceptedBeforeOverflow = 0;
+  let dropped = 0;
   let literalsFromInput = true;
   const drop = (char: string) => {
+    dropped++;
     if (isCandidate(char)) {
       acceptedBeforeOverflow = overflow === 0 ? acceptedCount : acceptedBeforeOverflow;
       overflow++;
@@ -311,12 +368,13 @@ function runPattern(
     const token = translation[maskChar];
 
     if (!token) {
-      // A literal consumes the input character only while the input is already formatted here:
-      // once a literal of the run had to be inserted, the following ones are inserted too, so
-      // "5" typed in "+55 (00)" is a digit and not the country code.
-      literalsFromInput = literalsFromInput && char === maskChar;
+      const consumes: boolean =
+        literalMode !== 'insert' &&
+        char === maskChar &&
+        (literalMode === 'consume' || literalsFromInput);
+      literalsFromInput = consumes;
       pending.push({ char: maskChar, token: false });
-      v += literalsFromInput ? step : 0;
+      v += consumes ? step : 0;
       m += step;
       continue;
     }
@@ -346,6 +404,8 @@ function runPattern(
     accepted,
     overflow,
     acceptedBeforeOverflow: overflow === 0 ? acceptedCount : acceptedBeforeOverflow,
+    acceptedCount,
+    dropped,
     complete: !hasMandatoryToken(pattern, translation, m, step),
   };
 }

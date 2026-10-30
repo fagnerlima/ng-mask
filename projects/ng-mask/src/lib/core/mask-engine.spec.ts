@@ -79,6 +79,10 @@ describe('applyMask', () => {
       ['+55 (51) 9', '+55 (51) 9'],
       ['+55 (51) 98765-4321', '+55 (51) 98765-4321'],
       ['5198765432', '+55 (51) 98765-432'],
+      ['55999998888', '+55 (55) 99999-8888'],
+      ['5551999998888', '+55 (51) 99999-8888'],
+      ['55 (51) 99999-8888', '+55 (51) 99999-8888'],
+      ['+55 (51) 99999-8888', '+55 (51) 99999-8888'],
     ])('treats %s typed in +55 (00) 00000-0000 as %s', (value, expected) => {
       expect(masked(value, brazil)).toBe(expected);
     });
@@ -88,6 +92,21 @@ describe('applyMask', () => {
       expect(masked('+1 (1', { pattern: '+1 (000) 000-0000' })).toBe('+1 (1');
     });
 
+    it('keeps a pasted country code that matches the leading literals (+1)', () => {
+      const config: MaskConfig = { pattern: '+1 (000) 000-0000' };
+
+      expect(masked('15551234567', config)).toBe('+1 (555) 123-4567');
+      expect(masked('5551234567', config)).toBe('+1 (555) 123-4567');
+    });
+
+    it('keeps the caret after the typed digit', () => {
+      expect(applyMaskWithCaret('5', 1, brazil)).toMatchObject({ masked: '+55 (5', caret: 6 });
+    });
+
+    it('empties the field when Backspace removes the last digit', () => {
+      expect(applyMaskWithCaret('+55 (', 5, brazil, true)).toMatchObject({ masked: '', caret: 0 });
+    });
+
     it('keeps a leading literal that the input already starts with (2000-00)', () => {
       const config: MaskConfig = { pattern: '2000-00' };
 
@@ -95,9 +114,21 @@ describe('applyMask', () => {
       expect(masked('223', config)).toBe('223');
       expect(masked('2234', config)).toBe('2234');
       expect(masked('22345', config)).toBe('2234-5');
-      // Ambiguous by design: a lone "2" is read as the literal, so that deleting the last digit
-      // of "22" empties the field instead of being undone by the mask.
-      expect(masked('2', config)).toBe('');
+    });
+
+    it('reads a lone character equal to a leading literal as typed input (2000-00)', () => {
+      const config: MaskConfig = { pattern: '2000-00' };
+
+      expect(applyMaskWithCaret('2', 1, config)).toMatchObject({ masked: '22', caret: 2 });
+      // The next keystroke continues from the formatted "22".
+      expect(applyMaskWithCaret('223', 3, config)).toMatchObject({ masked: '223', caret: 3 });
+    });
+
+    it('lets Backspace empty a field that starts with a digit literal (2000-00)', () => {
+      const config: MaskConfig = { pattern: '2000-00' };
+
+      expect(applyMaskWithCaret('2', 1, config, true)).toMatchObject({ masked: '', caret: 0 });
+      expect(applyMaskWithCaret('22', 2, config, true)).toMatchObject({ masked: '22', caret: 2 });
     });
   });
 
