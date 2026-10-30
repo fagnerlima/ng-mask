@@ -6,6 +6,7 @@ export {
   DEFAULT_TRANSLATION,
   applyMask,
   applyMaskWithCaret,
+  formatValue,
   type MaskConfig,
   type MaskEditResult,
   type MaskResult,

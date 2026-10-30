@@ -32,13 +32,26 @@ export interface MaskConfig {
   readonly reverse?: boolean;
   /** Extra or overriding tokens, merged over {@link DEFAULT_TRANSLATION}. */
   readonly translation?: MaskTranslation;
+  /**
+   * Number of decimal places of a fixed-point number mask, such as money. With a scale:
+   * - only digits are kept, extra leading zeros are removed and the value is padded to
+   *   `scale + 1` digits, so `5` shows as `0,05` with `#.##0,00`;
+   * - `raw` is a dot-decimal string with exactly `scale` decimals (`1234.56`);
+   * - {@link formatValue} formats numbers and dot-decimal strings with `toFixed(scale)`.
+   *
+   * Use it with a reverse pattern. Negative values are not supported: the sign is dropped.
+   */
+  readonly scale?: number;
 }
 
 /** Result of masking a value. */
 export interface MaskResult {
   /** The value formatted with the mask. */
   readonly masked: string;
-  /** Only the characters accepted by tokens (no literals), after any transform. */
+  /**
+   * Only the characters accepted by tokens (no literals), after any transform. For masks with a
+   * {@link MaskConfig.scale}, a dot-decimal string such as `1234.56`.
+   */
   readonly raw: string;
   /** Whether every mandatory token of the selected pattern was filled. */
   readonly complete: boolean;
@@ -74,9 +87,34 @@ interface PatternRun {
   readonly complete: boolean;
 }
 
-/** Applies a mask to a value. */
+const DECIMAL_STRING = /^-?\d+(?:\.\d+)?$/;
+
+/** Applies a mask to text, as typed or pasted by the user. */
 export function applyMask(value: string, config: MaskConfig): MaskResult {
-  return toResult(selectRun(value, config));
+  const input = prepareInput(value, value.length, config);
+
+  return toResult(selectRun(input.value, config), config);
+}
+
+/**
+ * Formats a value coming from code (a form model or a template) for display. Same as
+ * {@link applyMask}, except that `null`/`undefined` become empty and, for masks with a
+ * {@link MaskConfig.scale}, numbers and dot-decimal strings are read as numbers:
+ * `1234.5` and `'1234.5'` show as `1.234,50` with `brMoeda`.
+ */
+export function formatValue(
+  value: string | number | null | undefined,
+  config: MaskConfig,
+): MaskResult {
+  if (value === null || value === undefined) {
+    return applyMask('', config);
+  }
+
+  const digits = config.scale === undefined ? null : numberToScaledDigits(value, config.scale);
+
+  return digits === null
+    ? applyMask(String(value), config)
+    : toResult(selectRun(digits, config), config);
 }
 
 /**
@@ -92,24 +130,86 @@ export function applyMaskWithCaret(
   config: MaskConfig,
   deleteBackward = false,
 ): MaskEditResult {
-  const run = selectRun(value, config);
-  const boundedCaret = Math.max(0, Math.min(caret, value.length));
+  const input = prepareInput(value, Math.max(0, Math.min(caret, value.length)), config);
+  const run = selectRun(input.value, config);
   const mappedCaret = config.reverse
-    ? mapCaretFromEnd(run, boundedCaret, deleteBackward)
-    : mapCaretFromStart(run, boundedCaret, deleteBackward);
+    ? mapCaretFromEnd(run, input.caret, deleteBackward)
+    : mapCaretFromStart(run, input.caret, deleteBackward);
 
-  return { ...toResult(run), caret: mappedCaret };
+  return { ...toResult(run, config), caret: mappedCaret };
 }
 
-function toResult(run: PatternRun): MaskResult {
+/**
+ * Fixed-point masks work on digits only. The caret keeps the same number of digits after it,
+ * which is what reverse masks preserve, so it survives the zeros added or removed on the left.
+ */
+function prepareInput(
+  value: string,
+  caret: number,
+  config: MaskConfig,
+): { value: string; caret: number } {
+  if (config.scale === undefined) {
+    return { value, caret };
+  }
+
+  const digitsAfterCaret = onlyDigits(value.slice(caret)).length;
+  const digits = scaledDigits(onlyDigits(value), config.scale, false);
+
+  return { value: digits, caret: Math.max(0, digits.length - digitsAfterCaret) };
+}
+
+function numberToScaledDigits(value: string | number, scale: number): string | null {
+  const isDecimalString = typeof value === 'string' && DECIMAL_STRING.test(value.trim());
+  const number = typeof value === 'number' || isDecimalString ? Number(value) : Number.NaN;
+
+  if (!Number.isFinite(number)) {
+    return null;
+  }
+
+  return scaledDigits(Math.abs(number).toFixed(scale).replace('.', ''), scale, true);
+}
+
+/**
+ * Removes extra leading zeros and pads to `scale + 1` digits (`5` → `005`). Typed zeros alone
+ * clear the field, so deleting the last significant digit empties it; a zero number keeps `000`.
+ */
+function scaledDigits(digits: string, scale: number, keepZero: boolean): string {
+  const significant = digits.replace(/^0+/, '');
+
+  if (significant === '' && !keepZero) {
+    return '';
+  }
+
+  return significant.padStart(scale + 1, '0');
+}
+
+function onlyDigits(value: string): string {
+  return value.replace(/\D/g, '');
+}
+
+function toResult(run: PatternRun, config: MaskConfig): MaskResult {
+  const raw = run.cells
+    .filter((cell) => cell.token)
+    .map((cell) => cell.char)
+    .join('');
+
   return {
     masked: run.cells.map((cell) => cell.char).join(''),
-    raw: run.cells
-      .filter((cell) => cell.token)
-      .map((cell) => cell.char)
-      .join(''),
+    raw: config.scale === undefined ? raw : toDecimalString(raw, config.scale),
     complete: run.complete,
   };
+}
+
+/** `123456` with scale 2 → `1234.56`; `5` → `0.05`. */
+function toDecimalString(digits: string, scale: number): string {
+  if (digits === '') {
+    return '';
+  }
+
+  const padded = digits.padStart(scale + 1, '0');
+  const integer = padded.slice(0, padded.length - scale).replace(/^0+(?=\d)/, '');
+
+  return scale === 0 ? integer : `${integer}.${padded.slice(padded.length - scale)}`;
 }
 
 function selectRun(value: string, config: MaskConfig): PatternRun {

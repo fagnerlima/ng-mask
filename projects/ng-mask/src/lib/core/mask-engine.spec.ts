@@ -1,4 +1,4 @@
-import { MaskConfig, applyMask, applyMaskWithCaret } from './mask-engine';
+import { MaskConfig, applyMask, applyMaskWithCaret, formatValue } from './mask-engine';
 
 const masked = (value: string, config: MaskConfig) => applyMask(value, config).masked;
 
@@ -101,6 +101,42 @@ describe('applyMask', () => {
     });
   });
 
+  describe('fixed-point masks (scale)', () => {
+    const money: MaskConfig = { pattern: '#.##0,00', reverse: true, scale: 2 };
+
+    it.each([
+      ['5', '0,05', '0.05'],
+      ['50', '0,50', '0.50'],
+      ['500', '5,00', '5.00'],
+      ['0001', '0,01', '0.01'],
+      ['123456', '1.234,56', '1234.56'],
+      ['1.234,567', '12.345,67', '12345.67'],
+      ['R$ 1.234,56', '1.234,56', '1234.56'],
+    ])('formats %s as %s with raw %s', (value, expected, raw) => {
+      expect(applyMask(value, money)).toEqual({ masked: expected, raw, complete: true });
+    });
+
+    it.each(['', '0', '000', '0,00', 'abc'])('empties the field for %j', (value) => {
+      expect(applyMask(value, money)).toEqual({ masked: '', raw: '', complete: false });
+    });
+
+    it('keeps the caret before the same digits when zeros are added on the left', () => {
+      // "0,0|5" + "1" → "0,015" → "0,15", caret before the 5
+      expect(applyMaskWithCaret('0,015', 4, money)).toMatchObject({ masked: '0,15', caret: 3 });
+    });
+
+    it('empties the field when the last significant digit is deleted', () => {
+      expect(applyMaskWithCaret('0,0', 3, money, true)).toMatchObject({ masked: '', caret: 0 });
+    });
+
+    it('supports a scale of zero', () => {
+      expect(applyMask('0012', { pattern: '#.##0', reverse: true, scale: 0 })).toMatchObject({
+        masked: '12',
+        raw: '12',
+      });
+    });
+  });
+
   describe('reverse masks', () => {
     const money: MaskConfig = { pattern: '#.##0,00', reverse: true };
 
@@ -180,6 +216,38 @@ describe('applyMask', () => {
     it('rejects an empty pattern list', () => {
       expect(() => applyMask('1', { pattern: [] })).toThrowError(/at least one pattern/);
     });
+  });
+});
+
+describe('formatValue', () => {
+  const money: MaskConfig = { pattern: '#.##0,00', reverse: true, scale: 2 };
+
+  it.each([
+    [1234.5, '1.234,50', '1234.50'],
+    ['1234.5', '1.234,50', '1234.50'],
+    [10, '10,00', '10.00'],
+    ['10', '10,00', '10.00'],
+    [0.05, '0,05', '0.05'],
+    [0, '0,00', '0.00'],
+    [1234.567, '1.234,57', '1234.57'],
+  ])('formats the number %j as %s with raw %s', (value, expected, raw) => {
+    expect(formatValue(value, money)).toMatchObject({ masked: expected, raw });
+  });
+
+  it('reads already formatted text as typed text', () => {
+    expect(formatValue('1.234,56', money).masked).toBe('1.234,56');
+  });
+
+  it('drops the sign of negative numbers (not supported)', () => {
+    expect(formatValue(-5, money).masked).toBe('5,00');
+  });
+
+  it.each([null, undefined])('formats %s as empty', (value) => {
+    expect(formatValue(value, money).masked).toBe('');
+  });
+
+  it('formats numbers as text for masks without a scale', () => {
+    expect(formatValue(12345678909, { pattern: '000.000.000-00' }).masked).toBe('123.456.789-09');
   });
 });
 

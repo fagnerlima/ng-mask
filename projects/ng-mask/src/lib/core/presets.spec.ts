@@ -26,7 +26,7 @@ describe('presets', () => {
     ['brData', '31122026', '31/12/2026', '311', '31/1'],
     ['brHora', '2359', '23:59', '235', '23:5'],
     ['brDataHora', '311220262359', '31/12/2026 23:59', '311220262', '31/12/2026 2'],
-    ['brMoeda', '123456', '1.234,56', '1', '1'],
+    ['brMoeda', '123456', '1.234,56', '1', '0,01'],
     ['brPlaca', 'ABC1234', 'ABC-1234', 'ABC1', 'ABC-1'],
     ['brPlaca', 'BRA2E19', 'BRA2E19', 'BRA2E', 'BRA2E'],
     ['usPhone', '5815555895', '(581) 555-5895', '5815', '(581) 5'],
@@ -149,8 +149,13 @@ describe('presets', () => {
       expect(mask('123456789012', 'brMoeda').masked).toBe('1.234.567.890,12');
     });
 
-    it('extracts the raw digits', () => {
-      expect(mask('1.234,56', 'brMoeda').raw).toBe('123456');
+    it('writes the raw value as a dot-decimal string', () => {
+      expect(mask('1.234,56', 'brMoeda').raw).toBe('1234.56');
+    });
+
+    it('pads cents and removes extra leading zeros', () => {
+      expect(mask('5', 'brMoeda').masked).toBe('0,05');
+      expect(mask('0001', 'brMoeda').masked).toBe('0,01');
     });
   });
 });
@@ -185,11 +190,27 @@ describe('resolveMask', () => {
   it('keeps the 2.x decimal(p,s) mask', () => {
     const config = resolveMask('decimal(10,2)');
 
-    expect(config).toEqual({ pattern: '00000000.00', reverse: true });
-    expect(applyMask('12345', config!).masked).toBe('123.45');
+    expect(config).toEqual({ pattern: '00000000.00', reverse: true, scale: 2 });
+    expect(applyMask('12345', config!)).toMatchObject({ masked: '123.45', raw: '123.45' });
+    expect(applyMask('5', config!).masked).toBe('0.05');
   });
 
-  it('does not produce a negative integer part for decimal masks', () => {
-    expect(resolveMask('decimal(2,4)')).toEqual({ pattern: '.0000', reverse: true });
+  it('accepts the largest precision', () => {
+    expect(resolveMask('integer(64)')).toEqual({ pattern: '0'.repeat(64) });
+    expect(resolveMask('decimal(64,63)')).toMatchObject({ scale: 63 });
   });
+
+  it.each(['integer(0)', 'integer(65)', 'decimal(0,2)', 'decimal(65,2)', 'integer(99999999)'])(
+    'rejects %s: precision out of range',
+    (mask) => {
+      expect(() => resolveMask(mask)).toThrowError(/precision must be 1 to 64/);
+    },
+  );
+
+  it.each(['decimal(10,0)', 'decimal(2,2)', 'decimal(2,4)'])(
+    'rejects %s: scale out of range',
+    (mask) => {
+      expect(() => resolveMask(mask)).toThrowError(/scale must be 1 to precision - 1/);
+    },
+  );
 });

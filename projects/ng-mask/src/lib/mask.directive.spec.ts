@@ -38,7 +38,7 @@ function type(input: HTMLInputElement, text: string) {
   `,
 })
 class ReactiveHostComponent {
-  readonly control = new FormControl<string | null>(null);
+  readonly control = new FormControl<string | number | null>(null);
   readonly mask = signal<MaskInput>('brCpf');
   readonly output = signal<MaskOutput>('masked');
   readonly clearIfNotMatch = signal(false);
@@ -119,7 +119,7 @@ describe('MaskDirective', () => {
     it('ignores invalid characters without notifying the model', async () => {
       await setUp();
       type(input, '12');
-      const changes: (string | null)[] = [];
+      const changes: unknown[] = [];
       host.control.valueChanges.subscribe((value) => changes.push(value));
 
       edit(input, '12a');
@@ -237,6 +237,48 @@ describe('MaskDirective', () => {
       input.dispatchEvent(new FocusEvent('focus'));
 
       expect([input.selectionStart, input.selectionEnd]).toEqual([0, 14]);
+    });
+
+    describe('with brMoeda', () => {
+      beforeEach(async () => {
+        await setUp();
+        host.mask.set('brMoeda');
+        await fixture.whenStable();
+      });
+
+      it('formats a numeric model value with its decimals', () => {
+        host.control.setValue(1234.5);
+
+        expect(input.value).toBe('1.234,50');
+      });
+
+      it('pads cents while typing', () => {
+        type(input, '5');
+
+        expect(input.value).toBe('0,05');
+        expect(host.control.value).toBe('0,05');
+
+        type(input, '00');
+
+        expect(input.value).toBe('5,00');
+      });
+
+      it('writes a dot-decimal string with maskOutput="raw"', async () => {
+        host.output.set('raw');
+        await fixture.whenStable();
+        type(input, '123456');
+
+        expect(input.value).toBe('1.234,56');
+        expect(host.control.value).toBe('1234.56');
+      });
+
+      it('empties the field when the last digit is deleted', () => {
+        type(input, '5');
+        edit(input, '0,0', 3, 'deleteContentBackward');
+
+        expect(input.value).toBe('');
+        expect(host.control.value).toBe('');
+      });
     });
 
     it('sets the placeholder', async () => {

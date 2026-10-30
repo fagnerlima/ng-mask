@@ -12,7 +12,13 @@ import {
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
-import { MaskConfig, MaskResult, applyMask, applyMaskWithCaret } from './core/mask-engine';
+import {
+  MaskConfig,
+  MaskResult,
+  applyMask,
+  applyMaskWithCaret,
+  formatValue,
+} from './core/mask-engine';
 import { MaskInput, resolveMask } from './core/presets';
 
 /** Which representation of the value the directive writes to the form model. */
@@ -82,8 +88,11 @@ export class MaskDirective implements ControlValueAccessor {
   }
 
   writeValue(value: unknown): void {
-    const text = value === null || value === undefined ? '' : String(value);
-    const result = this.format(text);
+    const config = this.config();
+    const modelValue = typeof value === 'number' || value == null ? value : String(value);
+    const result = config
+      ? formatValue(modelValue, config)
+      : this.format(modelValue == null ? '' : String(modelValue));
 
     this.renderer.setProperty(this.element, 'value', result.masked);
     this.lastOutput = this.toOutput(result);

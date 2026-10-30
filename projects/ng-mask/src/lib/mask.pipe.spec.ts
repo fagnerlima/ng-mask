@@ -18,8 +18,18 @@ describe('MaskPipe', () => {
     expect(pipe.transform('123456', { pattern: '#.##0,00', reverse: true })).toBe('1.234,56');
   });
 
-  it('formats numbers', () => {
-    expect(pipe.transform(1234.56, 'brMoeda')).toBe('1.234,56');
+  it.each([
+    [1234.56, '1.234,56'],
+    [1234.5, '1.234,50'],
+    ['1234.5', '1.234,50'],
+    [10, '10,00'],
+    [0, '0,00'],
+  ])('formats the amount %j with brMoeda as %s', (value, expected) => {
+    expect(pipe.transform(value, 'brMoeda')).toBe(expected);
+  });
+
+  it('formats numbers with masks without a scale', () => {
+    expect(pipe.transform(1234, '00-00')).toBe('12-34');
   });
 
   it.each([null, undefined])('returns an empty string for %s', (value) => {

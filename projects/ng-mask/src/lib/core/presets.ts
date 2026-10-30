@@ -24,7 +24,7 @@ export const NG_MASK_PRESETS = {
   brData: { pattern: '00/00/0000' },
   brHora: { pattern: '00:00' },
   brDataHora: { pattern: '00/00/0000 00:00' },
-  brMoeda: { pattern: '#.##0,00', reverse: true },
+  brMoeda: { pattern: '#.##0,00', reverse: true, scale: 2 },
   brPlaca: { pattern: ['LLL-0000', 'LLL0L00'], translation: { L: LETTER_UPPER } },
   usPhone: { pattern: '(000) 000-0000' },
   coordinateLat: {
@@ -50,6 +50,7 @@ export type MaskPresetName = keyof typeof NG_MASK_PRESETS;
 export type MaskInput = MaskPresetName | string | MaskConfig | null | undefined;
 
 const NUMERIC_MASK = /^(?:integer\((\d+)\)|decimal\((\d+),(\d+)\))$/;
+const MAX_PRECISION = 64;
 
 /** Turns a {@link MaskInput} into a {@link MaskConfig}, or `null` when masking is disabled. */
 export function resolveMask(mask: MaskInput): MaskConfig | null {
@@ -68,7 +69,11 @@ export function resolveMask(mask: MaskInput): MaskConfig | null {
   return parseNumericMask(mask) ?? { pattern: mask };
 }
 
-/** `integer(6)` → `000000`; `decimal(5,2)` → reverse `000.00`, as in 2.x. */
+/**
+ * `integer(6)` → `000000`; `decimal(5,2)` → reverse `000.00` with scale 2, as in 2.x.
+ *
+ * @throws Error when the precision is not 1–64 or the scale is not between 1 and precision − 1.
+ */
 function parseNumericMask(mask: string): MaskConfig | null {
   const match = NUMERIC_MASK.exec(mask);
 
@@ -76,13 +81,26 @@ function parseNumericMask(mask: string): MaskConfig | null {
     return null;
   }
 
-  const [, integerPrecision, precision, scale] = match;
+  const [, integerPrecision, decimalPrecision, decimalScale] = match;
+  const precision = Number(integerPrecision ?? decimalPrecision);
 
-  if (integerPrecision !== undefined) {
-    return { pattern: '0'.repeat(Number(integerPrecision)) };
+  if (precision < 1 || precision > MAX_PRECISION) {
+    throw new Error(`[ng-mask] Invalid mask "${mask}": precision must be 1 to ${MAX_PRECISION}.`);
   }
 
-  const integerDigits = Math.max(Number(precision) - Number(scale), 0);
+  if (decimalScale === undefined) {
+    return { pattern: '0'.repeat(precision) };
+  }
 
-  return { pattern: `${'0'.repeat(integerDigits)}.${'0'.repeat(Number(scale))}`, reverse: true };
+  const scale = Number(decimalScale);
+
+  if (scale < 1 || scale >= precision) {
+    throw new Error(`[ng-mask] Invalid mask "${mask}": scale must be 1 to precision - 1.`);
+  }
+
+  return {
+    pattern: `${'0'.repeat(precision - scale)}.${'0'.repeat(scale)}`,
+    reverse: true,
+    scale,
+  };
 }
