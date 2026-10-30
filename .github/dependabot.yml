@@ -4,6 +4,9 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    # Wait a week before proposing a new release, to let malicious versions be caught first.
+    cooldown:
+      default-days: 7
     groups:
       angular:
         patterns:
@@ -25,6 +28,9 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    # Wait a week before proposing a new release, to let malicious versions be caught first.
+    cooldown:
+      default-days: 7
     groups:
       actions:
         patterns:

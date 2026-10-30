@@ -44,6 +44,8 @@ jobs:
   deploy:
     name: Deploy to GitHub Pages
     needs: build
+    # workflow_dispatch can run from any branch; only master is deployed.
+    if: github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
