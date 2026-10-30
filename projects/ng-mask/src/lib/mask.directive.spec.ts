@@ -266,6 +266,22 @@ describe('MaskDirective', () => {
       expect(changes).toEqual([]);
     });
 
+    it('does not notify a control marked as pristine after an edit when the mask changes', async () => {
+      await setUp();
+      type(input, '12345678909');
+      host.control.markAsPristine();
+      const changes: unknown[] = [];
+      host.control.valueChanges.subscribe((value) => changes.push(value));
+
+      host.mask.set('00.000.000/0000-00');
+      await fixture.whenStable();
+
+      expect(input.value).toBe('12.345.678/909');
+      expect(host.control.value).toBe('123.456.789-09');
+      expect(host.control.pristine).toBe(true);
+      expect(changes).toEqual([]);
+    });
+
     describe('with brMoeda', () => {
       beforeEach(async () => {
         await setUp();
@@ -288,6 +304,20 @@ describe('MaskDirective', () => {
         type(input, '00');
 
         expect(input.value).toBe('5,00');
+      });
+
+      it('keeps a raw model value written from code untouched', async () => {
+        host.output.set('raw');
+        await fixture.whenStable();
+        host.control.setValue('1234.56');
+        const changes: unknown[] = [];
+        host.control.valueChanges.subscribe((value) => changes.push(value));
+        await fixture.whenStable();
+
+        expect(input.value).toBe('1.234,56');
+        expect(host.control.value).toBe('1234.56');
+        expect(host.control.pristine).toBe(true);
+        expect(changes).toEqual([]);
       });
 
       it('writes a dot-decimal string with maskOutput="raw"', async () => {

@@ -1,6 +1,7 @@
 import {
   Directive,
   ElementRef,
+  Injector,
   Renderer2,
   booleanAttribute,
   computed,
@@ -10,7 +11,7 @@ import {
   input,
   untracked,
 } from '@angular/core';
-import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { ControlValueAccessor, NG_VALUE_ACCESSOR, NgControl } from '@angular/forms';
 
 import {
   MaskConfig,
@@ -64,6 +65,7 @@ export class MaskDirective implements ControlValueAccessor {
 
   private readonly element: TextField = inject<ElementRef<TextField>>(ElementRef).nativeElement;
   private readonly renderer = inject(Renderer2);
+  private readonly injector = inject(Injector);
   private readonly config = computed(() => resolveMask(this.mask()));
 
   private onChange: (value: string) => void = () => undefined;
@@ -170,8 +172,9 @@ export class MaskDirective implements ControlValueAccessor {
 
   /**
    * Re-applies the mask when the mask or the output mode changes. The model is only updated when
-   * it holds a user edit; a value written from code is just re-displayed, so changing the mask
-   * never marks a pristine control dirty or emits `valueChanges`.
+   * it holds a user edit of a control that is not pristine; a value written from code, or a
+   * control reset with `markAsPristine()`, is just re-displayed, so changing the mask never marks
+   * a pristine control dirty or emits `valueChanges`.
    */
   private reformat(config: MaskConfig | null): void {
     const { value } = this.element;
@@ -183,9 +186,14 @@ export class MaskDirective implements ControlValueAccessor {
     const result = applyMask(value, config);
     this.element.value = result.masked;
 
-    if (this.userEdited) {
+    if (this.userEdited && !this.isControlPristine()) {
       this.emit(result);
     }
+  }
+
+  /** Looked up lazily: the form control directive depends on this value accessor. */
+  private isControlPristine(): boolean {
+    return this.injector.get(NgControl, null, { self: true, optional: true })?.pristine === true;
   }
 
   private format(value: string): MaskResult {
