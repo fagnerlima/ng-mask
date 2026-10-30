@@ -1,8 +1,10 @@
 // Verifies the packed library: no runtime dependencies, no tslib imports, expected files present.
 // Usage: node scripts/check-package.mjs [distDir]
 import { execFileSync } from 'node:child_process';
-import { readFileSync, readdirSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
+
+import { forbiddenImportsInDir } from './bundle-imports.mjs';
 
 const dist = process.argv[2] ?? 'dist/ng-mask';
 const errors = [];
@@ -21,14 +23,7 @@ for (const peer of Object.keys(manifest.peerDependencies ?? {})) {
   }
 }
 
-const bundles = readdirSync(join(dist, 'fesm2022')).filter((file) => file.endsWith('.mjs'));
-for (const bundle of bundles) {
-  const source = readFileSync(join(dist, 'fesm2022', bundle), 'utf8');
-  const imports = [...source.matchAll(/from\s+['"]([^'"]+)['"]/g)].map((match) => match[1]);
-  for (const specifier of imports.filter((name) => !allowedPeers.has(name))) {
-    errors.push(`${bundle} imports "${specifier}", which is not an allowed peer dependency`);
-  }
-}
+errors.push(...forbiddenImportsInDir(join(dist, 'fesm2022'), [...allowedPeers]));
 
 // `npm pack --json` returns an array in older npm releases and an object keyed by name in newer ones.
 const packed = JSON.parse(

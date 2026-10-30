@@ -6,6 +6,8 @@
 import { copyFileSync, existsSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
+import { importSpecifiers } from './bundle-imports.mjs';
+
 const DIST = 'dist/ng-mask';
 const DOCS = ['README.md', 'LICENSE.md', 'CHANGELOG.md'];
 
@@ -20,7 +22,9 @@ for (const file of DOCS) {
 const bundleDir = join(DIST, 'fesm2022');
 const importsTslib = readdirSync(bundleDir)
   .filter((file) => file.endsWith('.mjs'))
-  .some((file) => /from\s+['"]tslib['"]/.test(readFileSync(join(bundleDir, file), 'utf8')));
+  .some((file) =>
+    importSpecifiers(readFileSync(join(bundleDir, file), 'utf8')).specifiers.includes('tslib'),
+  );
 
 if (importsTslib) {
   throw new Error('The bundles import tslib; it cannot be removed from the dependencies.');
