@@ -17,8 +17,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   `22`.
 - Fixed-point number masks through the `scale` option, used by `brMoeda` and `decimal(p,s)`:
   `5` shows `0,05`, extra leading zeros are removed, numbers such as `1234.5` written from code or
-  passed to the pipe show `1.234,50` (read exactly and rounded half up; exponent-notation and
-  non-finite numbers give an empty field), and the raw output is a dot-decimal string
+  passed to the pipe show `1.234,50` (read exactly and rounded half up; numbers of 1e21 or
+  more and non-finite numbers give an empty field), and the raw output is a dot-decimal string
   (`1234.56`). Negative values are not supported.
 - `MaskDirective` (`[mask]`) built on signal inputs and `ControlValueAccessor`, for reactive and
   template-driven forms or plain inputs, with correct caret handling when typing or deleting in the

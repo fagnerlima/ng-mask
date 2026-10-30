@@ -104,6 +104,8 @@ type LiteralMode = 'formatted' | 'consume' | 'insert';
 
 const DECIMAL_STRING = /^-?\d+(?:\.\d+)?$/;
 const MAX_SCALE = 64;
+/** From here on, `String()` and `toFixed()` write numbers in exponent notation. */
+const EXPONENT_NOTATION_FROM = 1e21;
 
 /** Applies a mask to text, as typed or pasted by the user. */
 export function applyMask(value: string, config: MaskConfig): MaskResult {
@@ -185,14 +187,21 @@ function prepareInput(
 /**
  * Reads numbers and dot-decimal strings as an amount scaled to integer digits, exactly: the text
  * is split at the dot and the fraction padded or rounded half up (`'1234.565'` → `123457` with
- * scale 2). Numbers that `String()` writes in exponent notation (`1e21`) and non-finite numbers
- * give an empty field. Returns `null` for other strings, which are read as typed text.
+ * scale 2). Numbers below 1e-6 go through `toFixed(scale)`; numbers of 1e21 or more (always in
+ * exponent notation) and non-finite numbers give an empty field. Returns `null` for other strings, which are read as typed text.
  */
 function numberToScaledDigits(value: string | number, scale: number): string | null {
   if (typeof value === 'number') {
-    const text = String(value);
+    const amount = Math.abs(value);
 
-    return Number.isFinite(value) && !/e/i.test(text) ? decimalToScaledDigits(text, scale) : '';
+    if (!Number.isFinite(amount) || amount >= EXPONENT_NOTATION_FROM) {
+      return '';
+    }
+
+    // String() is exact but uses exponent notation below 1e-6; toFixed rounds those to zero.
+    const text = String(amount);
+
+    return decimalToScaledDigits(/e/i.test(text) ? amount.toFixed(scale) : text, scale);
   }
 
   const text = value.trim();

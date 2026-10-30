@@ -174,13 +174,14 @@ A `scale` turns a reverse mask into a fixed-point number mask. `brMoeda` is
 | model `'1234.5'` or `'10'`       | `1.234,50`, `10,00` | —                         |
 | model `0`                        | `0,00`              | —                         |
 | model `'1234.565'`               | `1.234,57`          | —                         |
+| model `1e-7`                     | `0,00`              | —                         |
 | model `1e21`, `NaN`, `Infinity`  | (empty)             | —                         |
 
 - Digits fill the field from the right; extra leading zeros are removed. Deleting the last
   significant digit empties the field.
 - Numbers and dot-decimal strings (`'1234.5'`) written from code or passed to the pipe are read
   as amounts, exactly (as text, without floating-point rounding), and **rounded half up** to
-  `scale` decimals. Numbers that JavaScript writes in exponent notation (`1e21`, `1e-7`) and
+  `scale` decimals. Tiny numbers such as `1e-7` round to `0,00`; numbers of `1e21` or more and
   non-finite numbers give an empty field. Other strings are read as typed text.
 - A fixed-length pattern such as `decimal(5,2)` keeps the rightmost digits of a longer amount,
   whether typed or written from code: `123456.78` shows `456.78`. Choose a precision that fits

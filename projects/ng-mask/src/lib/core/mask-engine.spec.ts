@@ -295,12 +295,22 @@ describe('formatValue', () => {
     expect(formatValue('1.234,56', money).masked).toBe('1.234,56');
   });
 
-  it.each([1e21, 1e-7, Number.NaN, Number.POSITIVE_INFINITY])(
-    'formats the number %s, which has no plain decimal form, as empty',
+  it.each([1e21, -1e21, Number.MAX_VALUE, Number.NaN, Number.POSITIVE_INFINITY])(
+    'formats the number %s, too large or not finite, as empty',
     (value) => {
       expect(formatValue(value, money)).toEqual({ masked: '', raw: '', complete: false });
     },
   );
+
+  it.each([
+    [1e-7, '0,00', '0.00'],
+    [-1e-7, '0,00', '0.00'],
+    [Number.MIN_VALUE, '0,00', '0.00'],
+    [0.000004, '0,00', '0.00'],
+    [1e20, '100.000.000.000.000.000.000,00', '100000000000000000000.00'],
+  ])('formats the very small or large finite number %s as %s', (value, expected, raw) => {
+    expect(formatValue(value, money)).toMatchObject({ masked: expected, raw });
+  });
 
   it('keeps the rightmost digits of an amount too long for a fixed-length mask, like typing', () => {
     const decimal: MaskConfig = { pattern: '000.00', reverse: true, scale: 2 };
