@@ -21,7 +21,7 @@
     "packageManager": {
       "name": "npm",
       "version": ">=11.5.1",
-      "onFail": "error"
+      "onFail": "warn"
     }
   },
   "dependencies": {
