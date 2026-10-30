@@ -69,6 +69,38 @@ describe('applyMask', () => {
     });
   });
 
+  describe('literals that look like input', () => {
+    const brazil: MaskConfig = { pattern: '+55 (00) 00000-0000' };
+
+    it.each([
+      ['5', '+55 (5'],
+      ['55', '+55 (55'],
+      ['551', '+55 (55) 1'],
+      ['+55 (51) 9', '+55 (51) 9'],
+      ['+55 (51) 98765-4321', '+55 (51) 98765-4321'],
+      ['5198765432', '+55 (51) 98765-432'],
+    ])('treats %s typed in +55 (00) 00000-0000 as %s', (value, expected) => {
+      expect(masked(value, brazil)).toBe(expected);
+    });
+
+    it('treats a digit equal to an inserted literal as input (+1 (000) 000-0000)', () => {
+      expect(masked('1', { pattern: '+1 (000) 000-0000' })).toBe('+1 (1');
+      expect(masked('+1 (1', { pattern: '+1 (000) 000-0000' })).toBe('+1 (1');
+    });
+
+    it('keeps a leading literal that the input already starts with (2000-00)', () => {
+      const config: MaskConfig = { pattern: '2000-00' };
+
+      expect(masked('3', config)).toBe('23');
+      expect(masked('223', config)).toBe('223');
+      expect(masked('2234', config)).toBe('2234');
+      expect(masked('22345', config)).toBe('2234-5');
+      // Ambiguous by design: a lone "2" is read as the literal, so that deleting the last digit
+      // of "22" empties the field instead of being undone by the mask.
+      expect(masked('2', config)).toBe('');
+    });
+  });
+
   describe('reverse masks', () => {
     const money: MaskConfig = { pattern: '#.##0,00', reverse: true };
 

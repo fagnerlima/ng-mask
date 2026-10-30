@@ -188,6 +188,7 @@ function runPattern(
   let acceptedCount = 0;
   let overflow = 0;
   let acceptedBeforeOverflow = 0;
+  let literalsFromInput = true;
   const drop = (char: string) => {
     if (isCandidate(char)) {
       acceptedBeforeOverflow = overflow === 0 ? acceptedCount : acceptedBeforeOverflow;
@@ -210,8 +211,12 @@ function runPattern(
     const token = translation[maskChar];
 
     if (!token) {
+      // A literal consumes the input character only while the input is already formatted here:
+      // once a literal of the run had to be inserted, the following ones are inserted too, so
+      // "5" typed in "+55 (00)" is a digit and not the country code.
+      literalsFromInput = literalsFromInput && char === maskChar;
       pending.push({ char: maskChar, token: false });
-      v += char === maskChar ? step : 0;
+      v += literalsFromInput ? step : 0;
       m += step;
       continue;
     }
@@ -221,6 +226,7 @@ function runPattern(
       emit({ char: token.transform ? token.transform(char) : char, token: true });
       accepted[v] = true;
       acceptedCount++;
+      literalsFromInput = true;
       v += step;
       m = token.recursive && m === terminal && restart >= 0 ? restart : m + step;
       continue;
