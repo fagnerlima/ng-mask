@@ -1,0 +1,148 @@
+<header class="hero">
+  <h1>ng-mask</h1>
+  <p class="hero__tagline">
+    Zero-dependency input masks for Angular, with Brazilian masks ready to use: CPF,
+    <strong>alphanumeric CNPJ</strong>, phone, CEP, money and license plates.
+  </p>
+  <pre class="hero__install"><code>npm install &#64;fagnerlima/ng-mask</code></pre>
+  <nav class="hero__links">
+    <a href="https://github.com/fagnerlima/ng-mask">GitHub</a>
+    <a href="https://www.npmjs.com/package/@fagnerlima/ng-mask">npm</a>
+  </nav>
+</header>
+
+<main>
+  <section>
+    <h2>Brazilian presets</h2>
+    <p>Type in any field. Letters are upper-cased for CNPJ and plates.</p>
+    <div class="grid">
+      @for (preset of brazilianPresets; track preset.name) {
+        <app-preset-field
+          [preset]="preset.name"
+          [description]="preset.description"
+          [example]="preset.example"
+        />
+      }
+    </div>
+  </section>
+
+  <section>
+    <h2>Other presets</h2>
+    <div class="grid">
+      @for (preset of otherPresets; track preset.name) {
+        <app-preset-field
+          [preset]="preset.name"
+          [description]="preset.description"
+          [example]="preset.example"
+        />
+      }
+    </div>
+  </section>
+
+  <section>
+    <h2>Reactive form with validators</h2>
+    <p>
+      <code>cpfCnpjValidator</code> checks the check digits, including the alphanumeric CNPJ. Try
+      <code>12.ABC.345/01DE-35</code>. The amount is written to the model as raw digits.
+    </p>
+    <form class="card" [formGroup]="form" (ngSubmit)="submit()">
+      <label class="field">
+        <span class="field__label">Name</span>
+        <input type="text" formControlName="name" autocomplete="name" />
+      </label>
+      <label class="field">
+        <span class="field__label">CPF or CNPJ</span>
+        <input type="text" formControlName="document" mask="brCpfCnpj" autocomplete="off" />
+        @if (form.controls.document.touched && form.controls.document.hasError('cpfCnpj')) {
+          <span class="field__error">Invalid CPF or CNPJ.</span>
+        }
+      </label>
+      <label class="field">
+        <span class="field__label">Phone</span>
+        <input type="tel" formControlName="phone" mask="brTelefone" autocomplete="tel-national" />
+      </label>
+      <label class="field">
+        <span class="field__label">Amount (R$)</span>
+        <input
+          type="text"
+          inputmode="numeric"
+          formControlName="amount"
+          mask="brMoeda"
+          maskOutput="raw"
+        />
+      </label>
+      <button type="submit">Submit</button>
+      <pre class="output">form.value = {{ form.value | json }}</pre>
+      @if (submitted(); as value) {
+        <pre class="output ok">submitted = {{ value | json }}</pre>
+      }
+    </form>
+  </section>
+
+  <section>
+    <h2>Template-driven form</h2>
+    <form class="card">
+      <label class="field">
+        <span class="field__label">CEP, cleared on blur when incomplete</span>
+        <input
+          type="text"
+          name="cep"
+          [(ngModel)]="templateCep"
+          mask="brCep"
+          maskClearIfNotMatch
+          maskSelectOnFocus
+        />
+      </label>
+      <pre class="output">cep = {{ templateCep() | json }}</pre>
+    </form>
+  </section>
+
+  <section>
+    <h2>Custom pattern</h2>
+    <p>
+      Tokens: <code>0</code> digit, <code>9</code> optional digit, <code>#</code> recursive digit,
+      <code>A</code> letter or digit, <code>S</code> letter. Anything else is a literal.
+    </p>
+    <div class="card">
+      <label class="field">
+        <span class="field__label">Pattern</span>
+        <input type="text" name="pattern" [(ngModel)]="customPattern" spellcheck="false" />
+      </label>
+      <label class="checkbox">
+        <input type="checkbox" name="reverse" [(ngModel)]="customReverse" /> reverse
+      </label>
+      <label class="field">
+        <span class="field__label">Masked field</span>
+        <input type="text" name="custom" [(ngModel)]="customValue" [mask]="customMask()" />
+      </label>
+      <pre class="output">value = {{ customValue() | json }}</pre>
+    </div>
+  </section>
+
+  <section>
+    <h2>Pipe</h2>
+    <table class="card">
+      <thead>
+        <tr>
+          <th scope="col">Expression</th>
+          <th scope="col">Result</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (sample of pipeSamples; track sample.mask) {
+          <tr>
+            <td>
+              <code>'{{ sample.value }}' | mask: '{{ sample.mask }}'</code>
+            </td>
+            <td>{{ sample.value | mask: sample.mask }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </section>
+</main>
+
+<footer>
+  MIT © Fagner Lima ·
+  <a href="https://github.com/fagnerlima/ng-mask#readme">Documentation</a>
+</footer>

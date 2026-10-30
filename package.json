@@ -5,10 +5,12 @@
   "description": "Development workspace for @fagnerlima/ng-mask (library + demo).",
   "scripts": {
     "ng": "ng",
+    "start": "ng serve demo",
     "lint": "ng lint",
-    "test": "ng test ng-mask --watch=false",
-    "build": "npm run build:lib",
+    "test": "ng test ng-mask --watch=false && ng test demo --watch=false",
+    "build": "npm run build:lib && npm run build:demo",
     "build:lib": "ng build ng-mask && node scripts/finalize-package.mjs",
+    "build:demo": "ng build demo",
     "pack:check": "node scripts/check-package.mjs"
   },
   "packageManager": "npm@12.1.0",
