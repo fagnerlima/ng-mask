@@ -49,15 +49,32 @@ describe('App', () => {
     expect(query('#preset-brCep').getAttribute('autocomplete')).toBe('postal-code');
   });
 
-  it('reports errors and focuses the first invalid field on an invalid submit', async () => {
+  async function submitAndWaitForStatus() {
     query<HTMLButtonElement>('button[type="submit"]').click();
     await fixture.whenStable();
+    const cleared = query('[role="status"]').textContent?.trim();
+    await new Promise((resolve) => setTimeout(resolve, 150));
+    await fixture.whenStable();
+
+    return cleared;
+  }
+
+  it('reports errors and focuses the first invalid field on an invalid submit', async () => {
+    await submitAndWaitForStatus();
 
     const name = query<HTMLInputElement>('#form-name');
     expect(query('[role="status"]').textContent).toContain('Fix 2 fields');
     expect(document.activeElement).toBe(name);
     expect(name.getAttribute('aria-invalid')).toBe('true');
     expect(query(`#${name.getAttribute('aria-describedby')}`).textContent).toContain('Required');
+  });
+
+  it('clears and re-announces the status on a repeated invalid submit', async () => {
+    await submitAndWaitForStatus();
+    const cleared = await submitAndWaitForStatus();
+
+    expect(cleared).toBe('');
+    expect(query('[role="status"]').textContent).toContain('Fix 2 fields');
   });
 
   it('explains an invalid CPF/CNPJ', async () => {

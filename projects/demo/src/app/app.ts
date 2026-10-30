@@ -30,6 +30,9 @@ const PHONE: FieldAttributes = { type: 'tel', autocomplete: 'tel-national' };
 
 type FormField = 'name' | 'document' | 'phone' | 'amount';
 
+/** Long enough for screen readers to notice the live region was emptied. */
+const ANNOUNCE_DELAY_MS = 100;
+
 @Component({
   selector: 'app-root',
   imports: [JsonPipe, FormsModule, ReactiveFormsModule, MaskDirective, MaskPipe, PresetField],
@@ -130,14 +133,20 @@ export class App {
     if (this.form.invalid) {
       const invalid = Object.values(this.form.controls).filter((control) => control.invalid);
       this.submitted.set(null);
-      this.status.set(
+      this.announce(
         `Fix ${invalid.length} ${invalid.length === 1 ? 'field' : 'fields'} before submitting.`,
       );
       formElement.querySelector<HTMLElement>('.ng-invalid[formControlName]')?.focus();
       return;
     }
 
-    this.status.set('Submitted.');
+    this.announce('Submitted.');
     this.submitted.set(this.form.getRawValue());
+  }
+
+  /** Clears the live region first so that repeating the same message is announced again. */
+  private announce(message: string): void {
+    this.status.set('');
+    setTimeout(() => this.status.set(message), ANNOUNCE_DELAY_MS);
   }
 }

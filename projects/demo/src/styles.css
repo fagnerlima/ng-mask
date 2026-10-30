@@ -123,8 +123,9 @@ td {
   margin: 0;
 }
 
-.status:empty {
-  display: none;
+/* The live region stays in the layout, even when empty, so screen readers keep tracking it. */
+.status {
+  min-height: 1.5em;
 }
 
 .field__meta span {
