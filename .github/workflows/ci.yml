@@ -1,0 +1,56 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+
+permissions: {}
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Lint, test and build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Test library and demo
+        run: npm test
+
+      - name: Test release scripts
+        run: npm run test:scripts
+
+      - name: Build library
+        run: npm run build:lib
+
+      - name: Build demo
+        run: npm run build:demo -- --base-href /ng-mask/
+
+      - name: Pack library (dry run)
+        working-directory: dist/ng-mask
+        run: npm pack --dry-run
+
+      - name: Check packed package has no runtime dependencies
+        run: npm run pack:check

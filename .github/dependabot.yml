@@ -1,0 +1,31 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      angular:
+        patterns:
+          - '@angular/*'
+          - '@angular-devkit/*'
+          - 'angular-eslint'
+          - 'ng-packagr'
+          - 'typescript'
+      lint-and-test:
+        patterns:
+          - 'eslint'
+          - '@eslint/*'
+          - 'typescript-eslint'
+          - 'vitest'
+          - 'jsdom'
+          - 'prettier'
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        patterns:
+          - '*'

@@ -11,7 +11,8 @@
     "build": "npm run build:lib && npm run build:demo",
     "build:lib": "ng build ng-mask && node scripts/finalize-package.mjs",
     "build:demo": "ng build demo",
-    "pack:check": "node scripts/check-package.mjs"
+    "pack:check": "node scripts/check-package.mjs",
+    "test:scripts": "node --test 'scripts/*.test.mjs'"
   },
   "packageManager": "npm@12.1.0",
   "engines": {
