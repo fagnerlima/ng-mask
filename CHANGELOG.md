@@ -11,18 +11,21 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Framework-agnostic mask engine (`applyMask`, `applyMaskWithCaret`, `formatValue`) with jQuery
   Mask–compatible pattern syntax (`0`, `9`, `#`, `A`, `S`, custom `translation`), reverse masks,
-  pattern lists that switch as the user types, and character transforms. Literals the user types
-  are kept only where the value is already formatted, so typing `5` in `+55 (00) 00000-0000`
-  gives `+55 (5`.
+  pattern lists that switch as the user types, and character transforms. When a literal equals the
+  input, the reading that fits the whole input wins: typing `5` in `+55 (00) 00000-0000` gives
+  `+55 (5`, pasting `5551999998888` keeps the country code, and typing `2` in `2000-00` gives
+  `22`.
 - Fixed-point number masks through the `scale` option, used by `brMoeda` and `decimal(p,s)`:
   `5` shows `0,05`, extra leading zeros are removed, numbers such as `1234.5` written from code or
-  passed to the pipe show `1.234,50`, and the raw output is a dot-decimal string (`1234.56`).
-  Negative values are not supported.
+  passed to the pipe show `1.234,50` (read exactly and rounded half up; exponent-notation and
+  non-finite numbers give an empty field), and the raw output is a dot-decimal string
+  (`1234.56`). Negative values are not supported.
 - `MaskDirective` (`[mask]`) built on signal inputs and `ControlValueAccessor`, for reactive and
   template-driven forms or plain inputs, with correct caret handling when typing or deleting in the
   middle, paste and IME composition support.
 - `maskOutput="raw"` to write only the typed characters to the model. Changing `mask` or
-  `maskOutput` from code does not mark a pristine control dirty.
+  `maskOutput` from code does not mark a pristine control dirty, including after
+  `markAsPristine()`.
 - `MaskPipe` (`{{ value | mask: 'brCpf' }}`) for display.
 - Brazilian presets: `brCnpj` with the **alphanumeric CNPJ** (Receita Federal, from July 2026),
   `brCpfCnpj`, `brHora`, `brDataHora` and `brPlaca` (old and Mercosul plates).
@@ -47,7 +50,7 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - **BREAKING:** `brMoeda` and `decimal(p,s)` are fixed-point masks: `5` shows `0,05` instead of `5`
   and their raw value is a dot-decimal string.
 - **BREAKING:** `integer(p)` and `decimal(p,s)` throw an error unless the precision is 1 to 64 and
-  the scale is 1 to `p - 1`.
+  the scale is 1 to `p - 1`; a `MaskConfig.scale` that is not an integer from 1 to 64 also throws.
 
 ### Removed
 

@@ -127,9 +127,11 @@ Any string that is not a preset is a pattern. The syntax follows
 | `A`   | a letter or digit             |
 | `S`   | a letter                      |
 
-Any other character is a literal, inserted automatically. A literal the user types is kept only
-where the value is already formatted: with `+55 (00) 00000-0000`, typing `5` gives `+55 (5`, while
-pasting `+55 (51) 9…` keeps the country code. For more control, pass a `MaskConfig`:
+Any other character is a literal, inserted automatically. When a literal equals what the user
+typed, the reading that fits the whole input wins: with `+55 (00) 00000-0000`, typing `5` gives
+`+55 (5` and `55999998888` gives `+55 (55) 99999-8888`, while pasting `+55 (51) 99999-8888` or
+`5551999998888` keeps the country code. With `2000-00`, typing `2` gives `22`. For more control,
+pass a `MaskConfig`:
 
 ```typescript
 import { MaskConfig } from '@fagnerlima/ng-mask';
@@ -154,7 +156,8 @@ const zip: MaskConfig = { pattern: ['00000', '00000-0000'] };
 ```
 
 A token is `{ pattern: RegExp; optional?: boolean; recursive?: boolean; transform?: (char) => string }`.
-A `MaskConfig` is `{ pattern: string | string[]; reverse?: boolean; translation?; scale?: number }`.
+A `MaskConfig` is `{ pattern: string | string[]; reverse?: boolean; translation?; scale?: number }`,
+where `scale` is an integer from 1 to 64 (other values throw an `[ng-mask] Invalid mask` error).
 
 ## Money and decimal masks
 
@@ -170,11 +173,18 @@ A `scale` turns a reverse mask into a fixed-point number mask. `brMoeda` is
 | model `1234.5` (number)          | `1.234,50`          | —                         |
 | model `'1234.5'` or `'10'`       | `1.234,50`, `10,00` | —                         |
 | model `0`                        | `0,00`              | —                         |
+| model `'1234.565'`               | `1.234,57`          | —                         |
+| model `1e21`, `NaN`, `Infinity`  | (empty)             | —                         |
 
 - Digits fill the field from the right; extra leading zeros are removed. Deleting the last
   significant digit empties the field.
-- Numbers and dot-decimal strings (`'1234.5'`) written from code or passed to the pipe are
-  formatted with `toFixed(scale)`. Other strings are read as typed text.
+- Numbers and dot-decimal strings (`'1234.5'`) written from code or passed to the pipe are read
+  as amounts, exactly (as text, without floating-point rounding), and **rounded half up** to
+  `scale` decimals. Numbers that JavaScript writes in exponent notation (`1e21`, `1e-7`) and
+  non-finite numbers give an empty field. Other strings are read as typed text.
+- A fixed-length pattern such as `decimal(5,2)` keeps the rightmost digits of a longer amount,
+  whether typed or written from code: `123456.78` shows `456.78`. Choose a precision that fits
+  your amounts, or use a recursive pattern like `brMoeda`.
 - The raw output is a dot-decimal string with exactly `scale` decimals: use `Number(value)` to get
   a number. The masked output (the default) is the text shown in the field.
 - **Negative values are not supported**: the minus sign is dropped.
@@ -191,9 +201,10 @@ A `scale` turns a reverse mask into a fixed-point number mask. `brMoeda` is
 
 - Values written to the model from code (`setValue`, `ngModel`) are formatted for display, whether
   they are raw or already masked. They are not rewritten in the model.
-- Changing `mask` or `maskOutput` re-formats the field. If the value was written from code, the
-  model is left as is, so a pristine control stays pristine and no `valueChanges` is emitted. If
-  the user edited the field, the re-formatted value is written to the model like any edit.
+- Changing `mask` or `maskOutput` re-formats the field. If the value was written from code, or
+  the control is pristine (for example after `markAsPristine()`), the model is left as is and no
+  `valueChanges` is emitted. Otherwise the re-formatted value is written to the model like any
+  edit.
 - `maskClearIfNotMatch` clears the field silently, which can surprise users and screen-reader
   users. Prefer a validator with a visible error message.
 
@@ -293,8 +304,8 @@ Use `tel-national` rather than `tel`: autofilled `+55 …` numbers do not fit th
 - **Pasting more characters than the mask holds** truncates the value: fixed-length masks keep
   the first characters (reverse ones the last) and drop the rest.
 - **Negative numbers** are not supported by money and decimal masks.
-- A lone character equal to a leading literal is read as that literal: with `2000-00`, typing
-  `2` alone is consumed (so that deleting the last digit of `22` empties the field); type `22`.
+- With a pattern that starts with a digit literal such as `2000-00`, pressing **Delete** (not
+  Backspace) at the start of `22` brings the second `2` back. Backspace works as expected.
 
 ## Migrating from 2.x
 
@@ -316,6 +327,8 @@ your dependencies and scripts if nothing else uses them.
 | `decimal(p,s)`                              | fixed-point like `brMoeda`; invalid precision or scale throws                  |
 
 ## Development
+
+Requires Node 24 and npm 11.5.1 or later (npm warns on older versions; publishing needs it).
 
 ```bash
 npm ci
