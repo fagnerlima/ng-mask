@@ -14,9 +14,15 @@
     "pack:check": "node scripts/check-package.mjs",
     "test:scripts": "node --test 'scripts/*.test.mjs'"
   },
-  "packageManager": "npm@12.1.0",
   "engines": {
     "node": ">=24"
+  },
+  "devEngines": {
+    "packageManager": {
+      "name": "npm",
+      "version": ">=11.5.1",
+      "onFail": "error"
+    }
   },
   "dependencies": {
     "@angular/common": "^22.2.0",
