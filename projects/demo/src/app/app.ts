@@ -8,20 +8,27 @@ import {
   Validators,
 } from '@angular/forms';
 import {
-  MaskConfig,
   MaskDirective,
+  MaskInput,
   MaskPipe,
   MaskPresetName,
   cpfCnpjValidator,
 } from '@fagnerlima/ng-mask';
 
-import { PresetField } from './preset-field';
+import { FieldAttributes, PresetField } from './preset-field';
 
 interface PresetExample {
   readonly name: MaskPresetName;
-  readonly description: string;
-  readonly example: string;
+  readonly label: string;
+  readonly hint: string;
+  readonly attributes: FieldAttributes;
 }
+
+const NUMERIC: FieldAttributes = { inputmode: 'numeric' };
+const UPPER_TEXT: FieldAttributes = { inputmode: 'text', autocapitalize: 'characters' };
+const PHONE: FieldAttributes = { type: 'tel', autocomplete: 'tel-national' };
+
+type FormField = 'name' | 'document' | 'phone' | 'amount';
 
 @Component({
   selector: 'app-root',
@@ -30,26 +37,56 @@ interface PresetExample {
 })
 export class App {
   protected readonly brazilianPresets: readonly PresetExample[] = [
-    { name: 'brCpf', description: 'CPF', example: '000.000.000-00' },
-    { name: 'brCnpj', description: 'CNPJ, numeric or alphanumeric', example: '12.ABC.345/01DE-35' },
-    { name: 'brCpfCnpj', description: 'CPF or CNPJ, by length', example: 'CPF or CNPJ' },
-    { name: 'brTelefone', description: 'landline or mobile', example: '(00) 0000-0000' },
-    { name: 'brCelular', description: 'mobile', example: '(00) 00000-0000' },
-    { name: 'brCep', description: 'postal code', example: '00000-000' },
-    { name: 'brData', description: 'date', example: 'dd/mm/aaaa' },
-    { name: 'brHora', description: 'time', example: 'hh:mm' },
-    { name: 'brDataHora', description: 'date and time', example: 'dd/mm/aaaa hh:mm' },
-    { name: 'brMoeda', description: 'money, right to left', example: '0,00' },
-    { name: 'brPlaca', description: 'old or Mercosul plate', example: 'ABC-1234 / BRA2E19' },
+    { name: 'brCpf', label: 'CPF', hint: '000.000.000-00', attributes: NUMERIC },
+    {
+      name: 'brCnpj',
+      label: 'CNPJ, numeric or alphanumeric',
+      hint: 'AA.AAA.AAA/AAAA-00 (A: letter or digit)',
+      attributes: UPPER_TEXT,
+    },
+    {
+      name: 'brCpfCnpj',
+      label: 'CPF or CNPJ',
+      hint: '000.000.000-00 or AA.AAA.AAA/AAAA-00',
+      attributes: UPPER_TEXT,
+    },
+    {
+      name: 'brTelefone',
+      label: 'landline or mobile phone',
+      hint: '(00) 0000-0000 or (00) 00000-0000',
+      attributes: PHONE,
+    },
+    { name: 'brCelular', label: 'mobile phone', hint: '(00) 00000-0000', attributes: PHONE },
+    {
+      name: 'brCep',
+      label: 'postal code',
+      hint: '00000-000',
+      attributes: { ...NUMERIC, autocomplete: 'postal-code' },
+    },
+    { name: 'brData', label: 'date', hint: 'dd/mm/yyyy', attributes: NUMERIC },
+    { name: 'brHora', label: 'time', hint: 'hh:mm', attributes: NUMERIC },
+    { name: 'brDataHora', label: 'date and time', hint: 'dd/mm/yyyy hh:mm', attributes: NUMERIC },
+    {
+      name: 'brMoeda',
+      label: 'money (R$)',
+      hint: '1.234,56, typed from the right',
+      attributes: NUMERIC,
+    },
+    {
+      name: 'brPlaca',
+      label: 'license plate, old or Mercosul',
+      hint: 'ABC-1234 or ABC1D23',
+      attributes: UPPER_TEXT,
+    },
   ];
 
   protected readonly otherPresets: readonly PresetExample[] = [
-    { name: 'usPhone', description: 'US phone', example: '(000) 000-0000' },
-    { name: 'date', description: 'date', example: 'mm/dd/yyyy' },
-    { name: 'time', description: 'time', example: 'hh:mm:ss' },
-    { name: 'dateTime', description: 'date and time', example: 'mm/dd/yyyy hh:mm:ss' },
-    { name: 'coordinateLat', description: 'latitude', example: "000º00.0000'N" },
-    { name: 'coordinateLong', description: 'longitude', example: "000º00.0000'E" },
+    { name: 'usPhone', label: 'US phone', hint: '(000) 000-0000', attributes: PHONE },
+    { name: 'date', label: 'date', hint: 'mm/dd/yyyy', attributes: NUMERIC },
+    { name: 'time', label: 'time', hint: 'hh:mm:ss', attributes: NUMERIC },
+    { name: 'dateTime', label: 'date and time', hint: 'mm/dd/yyyy hh:mm:ss', attributes: NUMERIC },
+    { name: 'coordinateLat', label: 'latitude', hint: "000º00.0000'N", attributes: UPPER_TEXT },
+    { name: 'coordinateLong', label: 'longitude', hint: "000º00.0000'E", attributes: UPPER_TEXT },
   ];
 
   protected readonly form = new FormGroup({
@@ -62,26 +99,45 @@ export class App {
     amount: new FormControl('', { nonNullable: true }),
   });
   protected readonly submitted = signal<unknown>(null);
+  protected readonly status = signal('');
 
   protected readonly templateCep = signal('01310930');
 
   protected readonly customPattern = signal('AAA-9999');
   protected readonly customReverse = signal(false);
-  protected readonly customMask = computed<MaskConfig>(() => ({
-    pattern: this.customPattern() || ' ',
-    reverse: this.customReverse(),
-  }));
+  /** An empty pattern disables masking. */
+  protected readonly customMask = computed<MaskInput>(() =>
+    this.customPattern() ? { pattern: this.customPattern(), reverse: this.customReverse() } : '',
+  );
   protected readonly customValue = signal('');
 
   protected readonly pipeSamples = [
     { value: '12345678909', mask: 'brCpf' },
     { value: '12abc34501de35', mask: 'brCnpj' },
     { value: '11987654321', mask: 'brTelefone' },
-    { value: '123456789', mask: 'brMoeda' },
+    { value: 1234.5, mask: 'brMoeda' },
   ] as const;
 
-  protected submit(): void {
+  protected showError(field: FormField): boolean {
+    const control = this.form.controls[field];
+
+    return control.touched && control.invalid;
+  }
+
+  protected submit(formElement: HTMLFormElement): void {
     this.form.markAllAsTouched();
-    this.submitted.set(this.form.valid ? this.form.getRawValue() : null);
+
+    if (this.form.invalid) {
+      const invalid = Object.values(this.form.controls).filter((control) => control.invalid);
+      this.submitted.set(null);
+      this.status.set(
+        `Fix ${invalid.length} ${invalid.length === 1 ? 'field' : 'fields'} before submitting.`,
+      );
+      formElement.querySelector<HTMLElement>('.ng-invalid[formControlName]')?.focus();
+      return;
+    }
+
+    this.status.set('Submitted.');
+    this.submitted.set(this.form.getRawValue());
   }
 }

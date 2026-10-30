@@ -1,11 +1,17 @@
 <header class="hero">
   <h1>ng-mask</h1>
-  <p class="hero__tagline">
-    Zero-dependency input masks for Angular, with Brazilian masks ready to use: CPF,
-    <strong>alphanumeric CNPJ</strong>, phone, CEP, money and license plates.
-  </p>
+  <p class="hero__tagline">Input masks for Angular, with Brazilian masks ready to use.</p>
+  <ul class="highlights">
+    <li><strong>0 runtime dependencies</strong>: no jQuery, no mask library, not even tslib.</li>
+    <li>
+      <strong>Brazilian presets</strong>: CPF, CNPJ, phone, CEP, dates, money and license plates.
+    </li>
+    <li>
+      <strong>Alphanumeric CNPJ</strong> mask and CPF/CNPJ <strong>check-digit validators</strong>.
+    </li>
+  </ul>
   <pre class="hero__install"><code>npm install &#64;fagnerlima/ng-mask</code></pre>
-  <nav class="hero__links">
+  <nav class="hero__links" aria-label="Project links">
     <a href="https://github.com/fagnerlima/ng-mask">GitHub</a>
     <a href="https://www.npmjs.com/package/@fagnerlima/ng-mask">npm</a>
   </nav>
@@ -14,13 +20,18 @@
 <main>
   <section>
     <h2>Brazilian presets</h2>
-    <p>Type in any field. Letters are upper-cased for CNPJ and plates.</p>
+    <p>
+      The CPF is the Brazilian taxpayer number of a person and the CNPJ the registry number of a
+      company. From July 2026, new CNPJs may contain letters in their first 12 characters; the
+      <code>brCnpj</code> mask accepts them and writes them in upper case.
+    </p>
     <div class="grid">
       @for (preset of brazilianPresets; track preset.name) {
         <app-preset-field
           [preset]="preset.name"
-          [description]="preset.description"
-          [example]="preset.example"
+          [label]="preset.label"
+          [hint]="preset.hint"
+          [attributes]="preset.attributes"
         />
       }
     </div>
@@ -32,8 +43,9 @@
       @for (preset of otherPresets; track preset.name) {
         <app-preset-field
           [preset]="preset.name"
-          [description]="preset.description"
-          [example]="preset.example"
+          [label]="preset.label"
+          [hint]="preset.hint"
+          [attributes]="preset.attributes"
         />
       }
     </div>
@@ -43,35 +55,78 @@
     <h2>Reactive form with validators</h2>
     <p>
       <code>cpfCnpjValidator</code> checks the check digits, including the alphanumeric CNPJ. Try
-      <code>12.ABC.345/01DE-35</code>. The amount is written to the model as raw digits.
+      <code>12.ABC.345/01DE-35</code>. The amount is written to the model as a decimal string.
     </p>
-    <form class="card" [formGroup]="form" (ngSubmit)="submit()">
-      <label class="field">
-        <span class="field__label">Name</span>
-        <input type="text" formControlName="name" autocomplete="name" />
-      </label>
-      <label class="field">
-        <span class="field__label">CPF or CNPJ</span>
-        <input type="text" formControlName="document" mask="brCpfCnpj" autocomplete="off" />
-        @if (form.controls.document.touched && form.controls.document.hasError('cpfCnpj')) {
-          <span class="field__error">Invalid CPF or CNPJ.</span>
-        }
-      </label>
-      <label class="field">
-        <span class="field__label">Phone</span>
-        <input type="tel" formControlName="phone" mask="brTelefone" autocomplete="tel-national" />
-      </label>
-      <label class="field">
-        <span class="field__label">Amount (R$)</span>
+    <form #formElement class="card" [formGroup]="form" (ngSubmit)="submit(formElement)" novalidate>
+      <div class="field">
+        <label class="field__label" for="form-name">Name</label>
         <input
+          id="form-name"
+          type="text"
+          formControlName="name"
+          autocomplete="name"
+          [attr.aria-invalid]="showError('name')"
+          [attr.aria-describedby]="showError('name') ? 'form-name-error' : null"
+        />
+        @if (showError('name')) {
+          <p class="field__error" id="form-name-error">Required.</p>
+        }
+      </div>
+      <div class="field">
+        <label class="field__label" for="form-document">CPF or CNPJ</label>
+        <input
+          id="form-document"
+          type="text"
+          inputmode="text"
+          autocapitalize="characters"
+          autocomplete="off"
+          formControlName="document"
+          mask="brCpfCnpj"
+          [attr.aria-invalid]="showError('document')"
+          [attr.aria-describedby]="
+            'form-document-hint' + (showError('document') ? ' form-document-error' : '')
+          "
+        />
+        <p class="field__hint" id="form-document-hint">
+          Format: 000.000.000-00 or AA.AAA.AAA/AAAA-00
+        </p>
+        @if (showError('document')) {
+          <p class="field__error" id="form-document-error">
+            {{
+              form.controls.document.hasError('required')
+                ? 'Required.'
+                : 'Invalid CPF or CNPJ: check the digits.'
+            }}
+          </p>
+        }
+      </div>
+      <div class="field">
+        <label class="field__label" for="form-phone">Phone (optional)</label>
+        <input
+          id="form-phone"
+          type="tel"
+          autocomplete="tel-national"
+          formControlName="phone"
+          mask="brTelefone"
+          aria-describedby="form-phone-hint"
+        />
+        <p class="field__hint" id="form-phone-hint">Format: (00) 0000-0000 or (00) 00000-0000</p>
+      </div>
+      <div class="field">
+        <label class="field__label" for="form-amount">Amount in R$ (optional)</label>
+        <input
+          id="form-amount"
           type="text"
           inputmode="numeric"
           formControlName="amount"
           mask="brMoeda"
           maskOutput="raw"
+          aria-describedby="form-amount-hint"
         />
-      </label>
+        <p class="field__hint" id="form-amount-hint">Typed from the right: 1.234,56</p>
+      </div>
       <button type="submit">Submit</button>
+      <p class="status" role="status">{{ status() }}</p>
       <pre class="output">form.value = {{ form.value | json }}</pre>
       @if (submitted(); as value) {
         <pre class="output ok">submitted = {{ value | json }}</pre>
@@ -82,17 +137,24 @@
   <section>
     <h2>Template-driven form</h2>
     <form class="card">
-      <label class="field">
-        <span class="field__label">CEP, cleared on blur when incomplete</span>
+      <div class="field">
+        <label class="field__label" for="template-cep">CEP</label>
         <input
+          id="template-cep"
           type="text"
+          inputmode="numeric"
+          autocomplete="postal-code"
           name="cep"
           [(ngModel)]="templateCep"
           mask="brCep"
           maskClearIfNotMatch
           maskSelectOnFocus
+          aria-describedby="template-cep-hint"
         />
-      </label>
+        <p class="field__hint" id="template-cep-hint">
+          Format: 00000-000. An incomplete CEP is cleared when the field loses focus.
+        </p>
+      </div>
       <pre class="output">cep = {{ templateCep() | json }}</pre>
     </form>
   </section>
@@ -101,44 +163,60 @@
     <h2>Custom pattern</h2>
     <p>
       Tokens: <code>0</code> digit, <code>9</code> optional digit, <code>#</code> recursive digit,
-      <code>A</code> letter or digit, <code>S</code> letter. Anything else is a literal.
+      <code>A</code> letter or digit, <code>S</code> letter. Anything else is a literal. An empty
+      pattern disables masking.
     </p>
     <div class="card">
-      <label class="field">
-        <span class="field__label">Pattern</span>
-        <input type="text" name="pattern" [(ngModel)]="customPattern" spellcheck="false" />
-      </label>
+      <div class="field">
+        <label class="field__label" for="custom-pattern">Pattern</label>
+        <input
+          id="custom-pattern"
+          type="text"
+          name="pattern"
+          [(ngModel)]="customPattern"
+          spellcheck="false"
+        />
+      </div>
       <label class="checkbox">
-        <input type="checkbox" name="reverse" [(ngModel)]="customReverse" /> reverse
+        <input type="checkbox" name="reverse" [(ngModel)]="customReverse" /> Fill from the right
+        (reverse)
       </label>
-      <label class="field">
-        <span class="field__label">Masked field</span>
-        <input type="text" name="custom" [(ngModel)]="customValue" [mask]="customMask()" />
-      </label>
+      <div class="field">
+        <label class="field__label" for="custom-value">Masked field</label>
+        <input
+          id="custom-value"
+          type="text"
+          name="custom"
+          [(ngModel)]="customValue"
+          [mask]="customMask()"
+        />
+      </div>
       <pre class="output">value = {{ customValue() | json }}</pre>
     </div>
   </section>
 
   <section>
     <h2>Pipe</h2>
-    <table class="card">
-      <thead>
-        <tr>
-          <th scope="col">Expression</th>
-          <th scope="col">Result</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (sample of pipeSamples; track sample.mask) {
+    <div class="table-scroll">
+      <table class="card">
+        <thead>
           <tr>
-            <td>
-              <code>'{{ sample.value }}' | mask: '{{ sample.mask }}'</code>
-            </td>
-            <td>{{ sample.value | mask: sample.mask }}</td>
+            <th scope="col">Expression</th>
+            <th scope="col">Result</th>
           </tr>
-        }
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          @for (sample of pipeSamples; track sample.mask) {
+            <tr>
+              <td>
+                <code>{{ sample.value | json }} | mask: '{{ sample.mask }}'</code>
+              </td>
+              <td>{{ sample.value | mask: sample.mask }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
   </section>
 </main>
 
