@@ -72,10 +72,15 @@ export class CustomerForm {
 It works the same with `[(ngModel)]` and on plain inputs without forms:
 
 ```html
-<input name="cep" [(ngModel)]="cep" mask="brCep" /> <input mask="00/00/0000" placeholder="Date" />
+<!-- template-driven form -->
+<input name="cep" [(ngModel)]="cep" mask="brCep" />
+
+<!-- no forms -->
+<input mask="00/00/0000" />
 ```
 
-Use `type="text"` or `type="tel"`: browsers do not expose the caret of `type="number"` inputs.
+Use `type="text"` or `type="tel"`: browsers do not expose the caret of `type="number"` inputs. See
+[Accessible fields](#accessible-fields) for the right attributes per preset.
 
 ## Presets
 
@@ -90,7 +95,7 @@ Use `type="text"` or `type="tel"`: browsers do not expose the caret of `type="nu
 | `brData`         | `00/00/0000`                              | `15/10/2026`          |
 | `brHora`         | `00:00`                                   | `23:59`               |
 | `brDataHora`     | `00/00/0000 00:00`                        | `15/10/2026 23:59`    |
-| `brMoeda`        | `#.##0,00`, right to left                 | `1.234.567,89`        |
+| `brMoeda`        | `#.##0,00`, right to left, 2 decimals     | `1.234.567,89`        |
 | `brPlaca`        | `LLL-0000` or `LLL0L00` (L: letter)       | `ABC-1234`, `BRA2E19` |
 | `usPhone`        | `(000) 000-0000`                          | `(581) 555-5895`      |
 | `date`           | `00/00/0000`                              | `01/31/2026`          |
@@ -103,7 +108,10 @@ Use `type="text"` or `type="tel"`: browsers do not expose the caret of `type="nu
 - Masks with two patterns pick the first one that holds what was typed, so `brTelefone` becomes a
   mobile number at the eleventh digit and `brPlaca` becomes Mercosul when a letter is typed in the
   fifth position. `brCpfCnpj` switches to CNPJ at the twelfth character or at the first letter.
-- `integer(p)` and `decimal(p,s)` from 2.x still work (`integer(6)`, `decimal(10,2)`).
+- `brMoeda` is a fixed-point mask: see [Money and decimal masks](#money-and-decimal-masks).
+- `integer(p)` and `decimal(p,s)` from 2.x still work (`integer(6)`, `decimal(10,2)`). The
+  precision must be 1 to 64 and the scale 1 to `p - 1`; other values throw an error.
+  `decimal(p,s)` is a fixed-point mask like `brMoeda`, with `.` as the decimal separator.
 - All presets are exported as `NG_MASK_PRESETS`.
 
 ## Custom masks
@@ -119,7 +127,9 @@ Any string that is not a preset is a pattern. The syntax follows
 | `A`   | a letter or digit             |
 | `S`   | a letter                      |
 
-Any other character is a literal, inserted automatically. For more control, pass a `MaskConfig`:
+Any other character is a literal, inserted automatically. A literal the user types is kept only
+where the value is already formatted: with `+55 (00) 00000-0000`, typing `5` gives `+55 (5`, while
+pasting `+55 (51) 9…` keeps the country code. For more control, pass a `MaskConfig`:
 
 ```typescript
 import { MaskConfig } from '@fagnerlima/ng-mask';
@@ -144,19 +154,48 @@ const zip: MaskConfig = { pattern: ['00000', '00000-0000'] };
 ```
 
 A token is `{ pattern: RegExp; optional?: boolean; recursive?: boolean; transform?: (char) => string }`.
+A `MaskConfig` is `{ pattern: string | string[]; reverse?: boolean; translation?; scale?: number }`.
+
+## Money and decimal masks
+
+A `scale` turns a reverse mask into a fixed-point number mask. `brMoeda` is
+`{ pattern: '#.##0,00', reverse: true, scale: 2 }`:
+
+| The user types / the model holds | The field shows     | `maskOutput="raw"` writes |
+| -------------------------------- | ------------------- | ------------------------- |
+| `5`                              | `0,05`              | `0.05`                    |
+| `500`                            | `5,00`              | `5.00`                    |
+| `0001`                           | `0,01`              | `0.01`                    |
+| `123456`                         | `1.234,56`          | `1234.56`                 |
+| model `1234.5` (number)          | `1.234,50`          | —                         |
+| model `'1234.5'` or `'10'`       | `1.234,50`, `10,00` | —                         |
+| model `0`                        | `0,00`              | —                         |
+
+- Digits fill the field from the right; extra leading zeros are removed. Deleting the last
+  significant digit empties the field.
+- Numbers and dot-decimal strings (`'1234.5'`) written from code or passed to the pipe are
+  formatted with `toFixed(scale)`. Other strings are read as typed text.
+- The raw output is a dot-decimal string with exactly `scale` decimals: use `Number(value)` to get
+  a number. The masked output (the default) is the text shown in the field.
+- **Negative values are not supported**: the minus sign is dropped.
 
 ## Directive inputs
 
-| Input                 | Type                                 | Default    | Description                                                    |
-| --------------------- | ------------------------------------ | ---------- | -------------------------------------------------------------- |
-| `mask`                | preset name, pattern or `MaskConfig` | required   | The mask. An empty value disables masking.                     |
-| `maskOutput`          | `'masked' \| 'raw'`                  | `'masked'` | Writes `123.456.789-09` or `12345678909` to the form model.    |
-| `maskClearIfNotMatch` | `boolean`                            | `false`    | Clears the field on blur if the mask is not completely filled. |
-| `maskSelectOnFocus`   | `boolean`                            | `false`    | Selects the whole value on focus.                              |
-| `maskPlaceholder`     | `string`                             | —          | Sets the `placeholder` attribute.                              |
+| Input                 | Type                                 | Default    | Description                                                                       |
+| --------------------- | ------------------------------------ | ---------- | --------------------------------------------------------------------------------- |
+| `mask`                | preset name, pattern or `MaskConfig` | required   | The mask. An empty value disables masking.                                        |
+| `maskOutput`          | `'masked' \| 'raw'`                  | `'masked'` | Writes `123.456.789-09` or `12345678909` to the form model (`1234.56` for money). |
+| `maskClearIfNotMatch` | `boolean`                            | `false`    | Clears the field on blur if the mask is not completely filled.                    |
+| `maskSelectOnFocus`   | `boolean`                            | `false`    | Selects the whole value on focus.                                                 |
+| `maskPlaceholder`     | `string`                             | —          | Sets the `placeholder` attribute; unsetting it restores the original one.         |
 
-Values written to the model from code (`setValue`, `ngModel`) are formatted for display, whether
-they are raw or already masked. They are not rewritten in the model.
+- Values written to the model from code (`setValue`, `ngModel`) are formatted for display, whether
+  they are raw or already masked. They are not rewritten in the model.
+- Changing `mask` or `maskOutput` re-formats the field. If the value was written from code, the
+  model is left as is, so a pristine control stays pristine and no `valueChanges` is emitted. If
+  the user edited the field, the re-formatted value is written to the model like any edit.
+- `maskClearIfNotMatch` clears the field silently, which can surprise users and screen-reader
+  users. Prefer a validator with a visible error message.
 
 ## Validators
 
@@ -187,8 +226,10 @@ The same checks are available without Angular as `isValidCpf(value)` and `isVali
 <!-- 123.456.789-09 -->
 {{ '12abc34501de35' | mask: 'brCnpj' }}
 <!-- 12.ABC.345/01DE-35 -->
-{{ 123456 | mask: { pattern: '#.##0,00', reverse: true } }}
-<!-- 1.234,56 -->
+{{ 1234.5 | mask: 'brMoeda' }}
+<!-- 1.234,50 -->
+{{ '1234' | mask: { pattern: '00-00' } }}
+<!-- 12-34 -->
 ```
 
 `null` and `undefined` are rendered as an empty string.
@@ -198,11 +239,62 @@ The same checks are available without Angular as `isValidCpf(value)` and `isVali
 The engine has no Angular dependency and can format values anywhere:
 
 ```typescript
-import { applyMask, resolveMask } from '@fagnerlima/ng-mask';
+import { applyMask, formatValue, resolveMask } from '@fagnerlima/ng-mask';
 
 applyMask('12abc34501de35', resolveMask('brCnpj')!);
 // { masked: '12.ABC.345/01DE-35', raw: '12ABC34501DE35', complete: true }
+
+formatValue(1234.5, resolveMask('brMoeda')!);
+// { masked: '1.234,50', raw: '1234.50', complete: true }
 ```
+
+`applyMask` reads text as typed by the user; `formatValue` also reads numbers, as the pipe and
+the directive do for values written from code.
+
+## Accessible fields
+
+The mask does not choose the keyboard or autofill. Set these attributes on the input:
+
+| Preset                                                        | Input attributes                                    |
+| ------------------------------------------------------------- | --------------------------------------------------- |
+| `brCpf`, `brCep`, `brData`, `brHora`, `brDataHora`, `brMoeda` | `inputmode="numeric"`                               |
+| `brCnpj`, `brCpfCnpj`                                         | `inputmode="text" autocapitalize="characters"` (\*) |
+| `brTelefone`, `brCelular`                                     | `type="tel" autocomplete="tel-national"`            |
+| `brCep`                                                       | also `autocomplete="postal-code"`                   |
+| `brPlaca`                                                     | `autocapitalize="characters"`                       |
+
+(\*) A numeric keyboard would block the letters of the alphanumeric CNPJ, issued from July 2026.
+Use `tel-national` rather than `tel`: autofilled `+55 …` numbers do not fit the mask.
+
+```html
+<label for="cpf">CPF</label>
+<input
+  id="cpf"
+  mask="brCpf"
+  inputmode="numeric"
+  aria-describedby="cpf-hint"
+  formControlName="cpf"
+/>
+<p id="cpf-hint">Format: 000.000.000-00</p>
+```
+
+- Always use a visible `<label>`; a placeholder is not a label and disappears while typing.
+- Put the expected format in a hint linked with `aria-describedby`, and link error messages the
+  same way with `aria-invalid="true"`.
+- Do not set `maxlength` shorter than the longest pattern, literals included (18 characters for
+  `brCnpj`), or the browser cuts the value before the mask formats it.
+
+## Known limitations
+
+- **IME composition** (for example some Android keyboards) is masked when the composition ends,
+  so the text may appear unformatted until then.
+- **Browser undo** (Ctrl+Z) does not know about the formatting the mask applied and may restore
+  intermediate values.
+- **Pasting more characters than the mask holds** truncates the value: fixed-length masks keep
+  the first characters (reverse ones the last) and drop the rest.
+- **Negative numbers** are not supported by money and decimal masks.
+- A lone character equal to a leading literal is read as that literal: with `2000-00`, typing
+  `2` alone is consumed (so that deleting the last digit of `22` empties the field); type `22`.
 
 ## Migrating from 2.x
 
@@ -220,6 +312,8 @@ your dependencies and scripts if nothing else uses them.
 | `MaskService.createMask(...)`               | `resolveMask(...)` and `applyMask(...)`                                        |
 | model updated on blur                       | model updated on every change (`maskOutput` picks masked or raw)               |
 | `brCelular`: `(00) 00009-0000`              | `(00) 00000-0000`; use `brTelefone` for landline or mobile                     |
+| `brMoeda`: `5` shows `5`                    | fixed-point: `5` shows `0,05`; raw output is `0.05`                            |
+| `decimal(p,s)`                              | fixed-point like `brMoeda`; invalid precision or scale throws                  |
 
 ## Development
 
@@ -236,6 +330,8 @@ npm run pack:check       # verifies the packed library has no dependencies
 
 Releases are fully automated by [`.github/workflows/release.yml`](.github/workflows/release.yml):
 
+Releases are only published from tags on commits that are already on `master`.
+
 1. In a pull request, move the `Unreleased` entries of [`CHANGELOG.md`](CHANGELOG.md) to a new
    `## [X.Y.Z] - YYYY-MM-DD` section and merge it.
 2. Tag the merge commit and push the tag: `git tag vX.Y.Z && git push origin vX.Y.Z`.
@@ -246,9 +342,16 @@ Releases are fully automated by [`.github/workflows/release.yml`](.github/workfl
 
 One-time setup:
 
+- In the repository settings, under **Environments**, create an environment named `npm` with a
+  **required reviewer** and a deployment rule that only allows tags matching `v*.*.*`. The publish
+  job runs in this environment, so every release waits for approval.
 - On [npmjs.com](https://www.npmjs.com/package/@fagnerlima/ng-mask/access), add a **Trusted
-  Publisher** for GitHub Actions with repository `fagnerlima/ng-mask` and workflow `release.yml`.
-  No `NPM_TOKEN` secret is needed.
+  Publisher** for GitHub Actions with repository `fagnerlima/ng-mask`, workflow `release.yml` and
+  environment `npm`. No `NPM_TOKEN` secret is needed.
+- Under **Rules → Rulesets**, add a tag ruleset for `refs/tags/v*` that restricts creation,
+  update and deletion to maintainers.
+- After the first trusted publish, set the package's publishing access on npmjs.com to **Require
+  two-factor authentication and disallow tokens**, and revoke any old automation tokens.
 - In the repository settings, under **Pages**, set the source to **GitHub Actions**. The demo is
   deployed by [`.github/workflows/pages.yml`](.github/workflows/pages.yml) on every push to
   `master`.

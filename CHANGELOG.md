@@ -9,21 +9,31 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
-- Framework-agnostic mask engine (`applyMask`, `applyMaskWithCaret`) with jQuery Mask–compatible
-  pattern syntax (`0`, `9`, `#`, `A`, `S`, custom `translation`), reverse masks, pattern lists that
-  switch as the user types, and character transforms.
+- Framework-agnostic mask engine (`applyMask`, `applyMaskWithCaret`, `formatValue`) with jQuery
+  Mask–compatible pattern syntax (`0`, `9`, `#`, `A`, `S`, custom `translation`), reverse masks,
+  pattern lists that switch as the user types, and character transforms. Literals the user types
+  are kept only where the value is already formatted, so typing `5` in `+55 (00) 00000-0000`
+  gives `+55 (5`.
+- Fixed-point number masks through the `scale` option, used by `brMoeda` and `decimal(p,s)`:
+  `5` shows `0,05`, extra leading zeros are removed, numbers such as `1234.5` written from code or
+  passed to the pipe show `1.234,50`, and the raw output is a dot-decimal string (`1234.56`).
+  Negative values are not supported.
 - `MaskDirective` (`[mask]`) built on signal inputs and `ControlValueAccessor`, for reactive and
   template-driven forms or plain inputs, with correct caret handling when typing or deleting in the
   middle, paste and IME composition support.
-- `maskOutput="raw"` to write only the typed characters to the model.
+- `maskOutput="raw"` to write only the typed characters to the model. Changing `mask` or
+  `maskOutput` from code does not mark a pristine control dirty.
 - `MaskPipe` (`{{ value | mask: 'brCpf' }}`) for display.
 - Brazilian presets: `brCnpj` with the **alphanumeric CNPJ** (Receita Federal, from July 2026),
   `brCpfCnpj`, `brHora`, `brDataHora` and `brPlaca` (old and Mercosul plates).
 - CPF and CNPJ check-digit validation: `cpfValidator`, `cnpjValidator` and `cpfCnpjValidator` for
   Angular forms, and the framework-agnostic `isValidCpf` and `isValidCnpj`.
 - Demo application published to GitHub Pages: https://fagnerlima.github.io/ng-mask/
-- Automated releases: pushing a `vX.Y.Z` tag publishes to npm with provenance (Trusted Publishing)
-  and creates the GitHub Release from this changelog.
+- README guidance on accessible fields (keyboard, autofill, labels and hints per preset) and
+  known limitations.
+- Automated releases: pushing a `vX.Y.Z` tag on a `master` commit publishes to npm with provenance
+  (Trusted Publishing, gated by the `npm` environment) and creates the GitHub Release from this
+  changelog.
 
 ### Changed
 
@@ -34,6 +44,10 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - **BREAKING:** the model is updated on every keystroke (it used to be updated on blur only).
 - **BREAKING:** `brCelular` is now `(00) 00000-0000`, and `brTelefone` adapts between landline
   `(00) 0000-0000` and mobile `(00) 00000-0000` numbers.
+- **BREAKING:** `brMoeda` and `decimal(p,s)` are fixed-point masks: `5` shows `0,05` instead of `5`
+  and their raw value is a dot-decimal string.
+- **BREAKING:** `integer(p)` and `decimal(p,s)` throw an error unless the precision is 1 to 64 and
+  the scale is 1 to `p - 1`.
 
 ### Removed
 
