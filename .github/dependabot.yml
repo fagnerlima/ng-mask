@@ -1,0 +1,37 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    # Wait a week before proposing a new release, to let malicious versions be caught first.
+    cooldown:
+      default-days: 7
+    groups:
+      angular:
+        patterns:
+          - '@angular/*'
+          - '@angular-devkit/*'
+          - 'angular-eslint'
+          - 'ng-packagr'
+          - 'typescript'
+      lint-and-test:
+        patterns:
+          - 'eslint'
+          - '@eslint/*'
+          - 'typescript-eslint'
+          - 'vitest'
+          - 'jsdom'
+          - 'prettier'
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    # Wait a week before proposing a new release, to let malicious versions be caught first.
+    cooldown:
+      default-days: 7
+    groups:
+      actions:
+        patterns:
+          - '*'
