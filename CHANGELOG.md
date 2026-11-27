@@ -7,6 +7,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [3.0.0] - 2026-11-27
+
 ### Added
 
 - Framework-agnostic mask engine (`applyMask`, `applyMaskWithCaret`, `formatValue`) with jQuery
